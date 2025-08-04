@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import STEditor from "../pages/STEditor/STEditor";
 import AIActionButtons from "../pages/AIActionButtons";
 import AISuggestedAutocomplete from "../pages/AISuggestedAutocomplete";
-// ...inside your return:
-<AIActionButtons />
+import PendingChangesPanel from "../pages/STEditor/PendingChangesPanel";
+import SmartWatchPanel from "../pages/STEditor/SmartWatchPanel";
+import RoutineSearchbar from "../pages/STEditor/RoutineSearchbar";
 
 import {
   UploadCloud,
@@ -21,6 +22,60 @@ export default function LogicStudio() {
   const [showVendorDropdown, setShowVendorDropdown] = useState(false);
   const [showIntegrationDropdown, setShowIntegrationDropdown] = useState(false);
   const [showUploaderDropdown, setShowUploaderDropdown] = useState(false);
+  const [showPendingChanges, setShowPendingChanges] = useState(false);
+  const [showWatchPanel, setShowWatchPanel] = useState(true);
+
+  // Mock data for new components
+  const mockDiffs = [
+    {
+      line: 15,
+      original: "MotorStart := TRUE;",
+      modified: "MotorStart := Start_Button AND NOT E_Stop;",
+      type: 'changed' as const
+    },
+    {
+      line: 23,
+      original: "",
+      modified: "// Added safety interlock for conveyor",
+      type: 'added' as const
+    }
+  ];
+
+  const mockWatchVariables = [
+    {
+      name: "Motor_Current",
+      value: 15.7,
+      type: 'REAL' as const,
+      isPinned: false,
+      isAICritical: true,
+      alert: {
+        type: 'warning' as const,
+        message: "Current fluctuating - potential connection issue"
+      },
+      activity: {
+        changes: 23,
+        timespan: "last 5min"
+      }
+    },
+    {
+      name: "Conveyor_Running",
+      value: true,
+      type: 'BOOL' as const,
+      isPinned: true,
+      isAICritical: false
+    },
+    {
+      name: "Safety_OK",
+      value: false,
+      type: 'BOOL' as const,
+      isPinned: false,
+      isAICritical: true,
+      alert: {
+        type: 'error' as const,
+        message: "Safety circuit open - check E-stops and guards"
+      }
+    }
+  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-primary">
@@ -34,16 +89,46 @@ export default function LogicStudio() {
       </header>
 
       {/* Main Workspace */}
-      <main className="flex-1 flex flex-col p-6 space-y-6">
-        {/* Monaco Editor */}
-       {/* Monaco Editor */}
-<STEditor
-  initialCode={prompt}
-  vendorType={vendor}
-  onChange={(code) => setPrompt(code)}
-/>
+      <main className="flex-1 flex gap-6 p-6">
+        {/* Left Column - Main Editor */}
+        <div className="flex-1 space-y-6">
+          {/* Search Bar */}
+          <div className="flex justify-end">
+            <RoutineSearchbar
+              onSearch={(query) => {
+                console.log("Searching for:", query);
+                return []; // Mock implementation
+              }}
+              onSelectResult={(result) => {
+                console.log("Selected result:", result);
+                // In real implementation, would jump to line/routine
+              }}
+            />
+          </div>
 
-{/* AI Tools Buttons */}
+          {/* Monaco Editor */}
+          <STEditor
+            initialCode={prompt}
+            vendorType={vendor}
+            onChange={(code) => setPrompt(code)}
+          />
+
+          {/* Pending Changes Panel */}
+          <PendingChangesPanel
+            isEnabled={showPendingChanges}
+            onToggle={setShowPendingChanges}
+            diffs={mockDiffs}
+            originalCode="PROGRAM Main\n  VAR\n    MotorStart : BOOL;\n  END_VAR\n  MotorStart := TRUE;\nEND_PROGRAM"
+            modifiedCode="PROGRAM Main\n  VAR\n    MotorStart : BOOL;\n  END_VAR\n  // Added safety interlock for conveyor\n  MotorStart := Start_Button AND NOT E_Stop;\nEND_PROGRAM"
+            aiSummary="User added safety interlock logic and documentation. Changes improve safety compliance by checking emergency stop conditions."
+            onReintegrate={() => console.log("Reintegrating changes with AI...")}
+            onRevert={() => {
+              console.log("Reverting changes...");
+              setShowPendingChanges(false);
+            }}
+          />
+
+          {/* AI Tools Buttons */}
 <div className="flex gap-3 mt-2">
   <button
     onClick={() => {
@@ -250,9 +335,55 @@ export default function LogicStudio() {
           </button>
         </div>
 
-        {/* Workflow Step Indicator */}
-        <div className="text-xs text-muted text-center mt-2">
-          🟢 Define Prompt → 🟡 Upload Docs → 🟡 Choose Vendor → ⚪ Review/Edit Logic
+          {/* Workflow Step Indicator */}
+          <div className="text-xs text-muted text-center mt-2">
+            🟢 Define Prompt → 🟡 Upload Docs → 🟡 Choose Vendor → ⚪ Review/Edit Logic
+          </div>
+        </div>
+
+        {/* Right Column - AI Panels */}
+        <div className="w-80 space-y-4">
+          {/* Smart Watch Panel */}
+          <SmartWatchPanel
+            variables={mockWatchVariables}
+            onPin={(varName) => console.log("Pinning variable:", varName)}
+            onUnpin={(varName) => console.log("Unpinning variable:", varName)}
+            isSimulationActive={true}
+          />
+
+          {/* AI Suggested Autocomplete */}
+          <AISuggestedAutocomplete
+            suggestions={[
+              "IF Safety_OK AND Start_Button THEN",
+              "Conveyor_Speed := Target_Speed;",
+              "Motor_Fault := Overload OR Overcurrent;"
+            ]}
+          />
+
+          {/* Quick Actions */}
+          <div className="bg-white border border-light rounded-md p-3">
+            <h3 className="text-sm font-medium text-primary mb-3">Quick Actions</h3>
+            <div className="space-y-2">
+              <button
+                onClick={() => setShowPendingChanges(!showPendingChanges)}
+                className="w-full text-left text-xs bg-gray-50 hover:bg-gray-100 p-2 rounded transition-colors"
+              >
+                {showPendingChanges ? '📋 Hide' : '📋 Show'} Pending Changes
+              </button>
+              <button
+                onClick={() => console.log("Opening tag database...")}
+                className="w-full text-left text-xs bg-gray-50 hover:bg-gray-100 p-2 rounded transition-colors"
+              >
+                🏷️ Manage Tags
+              </button>
+              <button
+                onClick={() => console.log("Running simulation...")}
+                className="w-full text-left text-xs bg-gray-50 hover:bg-gray-100 p-2 rounded transition-colors"
+              >
+                ▶️ Test Logic
+              </button>
+            </div>
+          </div>
         </div>
       </main>
       <AIActionButtons />
