@@ -206,7 +206,7 @@ export default function AutoDocs() {
   const previewContent = selectedPreview ? documents.find(d => d.id === selectedPreview) : null;
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col h-full bg-background">
       {/* Header Bar */}
       <header className="bg-white border-b border-light px-6 py-4">
         <div className="flex items-center justify-between">
@@ -509,8 +509,6 @@ export default function AutoDocs() {
           </div>
         )}
       </div>
-
-      <PandauraOrb />
     </div>
   );
 }

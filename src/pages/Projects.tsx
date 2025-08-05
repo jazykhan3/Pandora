@@ -198,7 +198,7 @@ export default function Projects() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col h-full bg-background">
       {/* Header */}
       <header className="bg-white border-b border-light px-6 py-4">
         <div className="flex items-center justify-between">
@@ -533,7 +533,6 @@ export default function Projects() {
           </div>
         </div>
       )}
-      <PandauraOrb />
     </div>
   );
 }

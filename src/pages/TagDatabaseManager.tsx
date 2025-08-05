@@ -179,7 +179,7 @@ export default function TagDatabaseManager() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background text-primary">
+    <div className="flex flex-col h-full bg-background text-primary">
       {/* 🟨 Sticky Top Bar */}
       <div className="sticky top-0 z-30 bg-white border-b border-light px-6 py-4 flex justify-between items-center shadow-sm">
         <h1 className="text-xl font-bold text-primary">Tag Database Manager</h1>
@@ -515,8 +515,6 @@ export default function TagDatabaseManager() {
           )}
         </div>
       </div>
-
-      <PandauraOrb />
     </div>
   );
 }
