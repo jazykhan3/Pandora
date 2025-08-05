@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { Plug, UploadCloud, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function NavbarIcons() {
   const [activeDropdown, setActiveDropdown] = useState<"integrations" | "uploader" | "profile" | null>(null);
+  const navigate = useNavigate();
 
   const toggleDropdown = (type: typeof activeDropdown) => {
     setActiveDropdown(prev => (prev === type ? null : type));
@@ -124,8 +126,8 @@ export default function NavbarIcons() {
             <ul className="text-gray-800">
               <li 
                 onClick={() => {
-                  console.log("Opening profile...");
-                  alert("Profile settings would open here");
+                  console.log("Navigating to profile...");
+                  navigate('/profile');
                   setActiveDropdown(null);
                 }}
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"

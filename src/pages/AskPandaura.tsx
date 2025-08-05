@@ -17,7 +17,10 @@ import logo from "../assets/logop.png";
 import pandauraLogo from "../assets/logo.png";
 import NavbarIcons from "../pages/NavbarIcons";
 import STEditor from "../pages/STEditor/STEditor";
-import TagDatabaseManager from "../pages/TagDatabaseManager"; // ✅ ADDED
+import TagDatabaseManager from "../pages/TagDatabaseManager";
+import AutoDocs from "../pages/AutoDocs";
+import Projects from "../pages/Projects";
+import Profile from "../pages/Profile";
 
 const tools = [
   "Pandaura AS",
@@ -369,12 +372,14 @@ export default function AskPandauraLayout() {
   const renderContent = () => {
     if (activeTool === "Pandaura AS") return renderPandauraScreen();
     if (activeTool === "Logic Studio") return renderLogicStudio();
+    if (activeTool === "AutoDocs") return <AutoDocs />;
     if (activeTool === "Tag Database Manager") return <TagDatabaseManager />;
+    if (activeTool === "Projects") return <Projects />;
 
     return (
       <div className="text-center text-muted py-12 pb-32">
-        <h3 className="text-lg font-medium text-secondary mb-2">Next Module</h3>
-        <p>This module will be fully implemented in the next development phase.</p>
+        <h3 className="text-lg font-medium text-secondary mb-2">Module Available</h3>
+        <p>This module is ready to use. Click on it in the sidebar to access its features.</p>
       </div>
     );
   };
