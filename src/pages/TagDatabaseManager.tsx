@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Download, ChevronDown, Bot, Edit, Trash2, Plus, Check, X } from "lucide-react";
 import PandauraOrb from "../components/PandauraOrb";
 
@@ -24,6 +24,20 @@ export default function TagDatabaseManager() {
   const [selectedDataType, setSelectedDataType] = useState("All Data Types");
   const [selectedScope, setSelectedScope] = useState("All Scopes");
   const [showAIOnly, setShowAIOnly] = useState(false);
+  
+  const vendorDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (vendorDropdownRef.current && !vendorDropdownRef.current.contains(event.target as Node)) {
+        setShowVendorDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const [tags, setTags] = useState<Tag[]>([
     {
@@ -180,7 +194,7 @@ export default function TagDatabaseManager() {
           >
             Export to Excel (.xlsx)
           </button>
-          <div className="relative">
+          <div className="relative" ref={vendorDropdownRef}>
             <button
               onClick={() => setShowVendorDropdown(!showVendorDropdown)}
               className="bg-white border border-light px-4 py-2 rounded-md flex items-center gap-2 text-sm hover:bg-accent-light transition-colors cursor-pointer"

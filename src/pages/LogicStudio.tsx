@@ -163,7 +163,7 @@ END_PROGRAM`);
           </div>
 
           {/* Monaco Editor */}
-          <div className="h-96 border border-light rounded-md overflow-hidden">
+          <div className="h-[60vh] min-h-[800px] border border-light rounded-md overflow-hidden">
             <STEditor
               initialCode={editorCode}
               vendorType={vendor}
@@ -510,17 +510,7 @@ END_PROGRAM`;
             </div>
           </div>
 
-          {/* Smart Document Uploader button */}
-          <button
-            onClick={() => {
-              console.log("Opening document uploader...");
-              // Trigger file upload dialog
-            }}
-            className="border border-light bg-white p-3 rounded-md shadow-sm hover:bg-accent-light transition-all text-sm"
-            title="Upload any project documents to improve logic accuracy."
-          >
-            <UploadCloud className="w-5 h-5 text-primary" />
-          </button>
+
         </div>
 
           {/* Workflow Step Indicator */}

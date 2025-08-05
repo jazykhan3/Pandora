@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   UploadCloud,
   ChevronDown,
@@ -60,6 +60,20 @@ export default function AskPandauraLayout() {
   const [vendor, setVendor] = useState("Rockwell");
   const [showVendorDropdown, setShowVendorDropdown] = useState(false);
   const [showConversationsModal, setShowConversationsModal] = useState(false);
+  
+  const vendorDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (vendorDropdownRef.current && !vendorDropdownRef.current.contains(event.target as Node)) {
+        setShowVendorDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const renderHeader = () => (
     <header className="flex items-center justify-between bg-surface px-6 py-4 border-b border-light shadow">
@@ -250,8 +264,8 @@ export default function AskPandauraLayout() {
         </div>
       </div>
 
-      <div className={`fixed bottom-0 right-0 bg-white border-t px-6 py-4 shadow-md z-30 transition-all duration-300 ${
-        sidebarOpen ? 'left-72' : 'left-16'
+      <div className={`fixed bottom-0 bg-white border-t px-6 py-4 shadow-md z-30 transition-all duration-300 ${
+        sidebarOpen ? 'left-72 right-0' : 'left-16 right-0'
       }`}>
         <div className="flex items-end gap-3 max-w-6xl mx-auto">
           <textarea
@@ -331,7 +345,7 @@ export default function AskPandauraLayout() {
           onChange={(e) => setPrompt(e.target.value)}
         />
 
-        <div className="relative">
+        <div className="relative" ref={vendorDropdownRef}>
           <button
             onClick={() => setShowVendorDropdown(!showVendorDropdown)}
             className="flex items-center gap-2 border border-light bg-white px-4 py-2 rounded-md shadow-sm text-sm text-primary hover:bg-accent-light transition-all"

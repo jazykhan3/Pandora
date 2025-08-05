@@ -15,7 +15,7 @@ export default function PandauraOrb() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "Hi! I'm your Pandaura AI assistant. I can help you with PLC programming, automation systems, tag management, and more. What would you like to know?",
+      text: "Pandaura AS (Mini) is your smart co-engineer. It adapts to whatever page you're on and helps with tips, training, logic guidance, and more — always context-aware, always available.",
       sender: 'pandaura',
       timestamp: new Date().toLocaleTimeString()
     }
@@ -101,7 +101,7 @@ export default function PandauraOrb() {
         data-pandaura-orb
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-6 right-6 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform z-50"
-        title="Ask Pandaura AI Assistant"
+        title="Ask Pandaura AS (Mini)"
       >
         <Bot className="w-6 h-6 text-white" />
       </button>
@@ -118,7 +118,7 @@ export default function PandauraOrb() {
           <div className="bg-primary text-white p-3 rounded-t-lg flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Bot className="w-4 h-4" />
-              <span className="text-sm font-medium">Pandaura AI Assistant</span>
+              <span className="text-sm font-medium">Pandaura AS (Mini)</span>
               <span className="text-xs bg-green-500 px-1 rounded">Online</span>
             </div>
             <div className="flex gap-1">

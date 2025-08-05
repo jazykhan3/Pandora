@@ -136,7 +136,7 @@ export default function STEditor({ initialCode, vendorType, onChange }: Props) {
   };
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-[90vh]">
       {/* Refactor Suggestion Banner */}
       {showRefactorSuggestion && (
         <RefactorSuggestionBanner
