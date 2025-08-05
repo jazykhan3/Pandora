@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import STEditor from "../pages/STEditor/STEditor";
 import AIActionButtons from "../pages/AIActionButtons";
 import AISuggestedAutocomplete from "../pages/AISuggestedAutocomplete";
 import PendingChangesPanel from "../pages/STEditor/PendingChangesPanel";
 import SmartWatchPanel from "../pages/STEditor/SmartWatchPanel";
 import RoutineSearchbar from "../pages/STEditor/RoutineSearchbar";
+import PandauraOrb from "../components/PandauraOrb";
 
 import {
   UploadCloud,
@@ -18,12 +19,43 @@ const vendorOptions = ["Rockwell", "Siemens", "Beckhoff"];
 
 export default function LogicStudio() {
   const [prompt, setPrompt] = useState("");
+  const [editorCode, setEditorCode] = useState(`PROGRAM Main
+  VAR
+    Start_Button    : BOOL;
+    Stop_Button     : BOOL;
+    Emergency_Stop  : BOOL;
+    Motor_Contactor : BOOL;
+    Motor_Running   : BOOL;
+    Safety_OK       : BOOL;
+  END_VAR
+
+  // Safety Circuit
+  Safety_OK := NOT Emergency_Stop;
+
+  // Motor Control Logic
+  IF Start_Button AND Safety_OK AND NOT Stop_Button THEN
+    Motor_Contactor := TRUE;
+  ELSIF Stop_Button OR NOT Safety_OK THEN
+    Motor_Contactor := FALSE;
+  END_IF;
+
+  Motor_Running := Motor_Contactor;
+
+END_PROGRAM`);
   const [vendor, setVendor] = useState("Rockwell" as "Rockwell" | "Siemens" | "Beckhoff");
   const [showVendorDropdown, setShowVendorDropdown] = useState(false);
   const [showIntegrationDropdown, setShowIntegrationDropdown] = useState(false);
   const [showUploaderDropdown, setShowUploaderDropdown] = useState(false);
   const [showPendingChanges, setShowPendingChanges] = useState(false);
   const [showWatchPanel, setShowWatchPanel] = useState(true);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
+  const [showActionDropdown, setShowActionDropdown] = useState(false);
+  
+  const vendorDropdownRef = useRef<HTMLDivElement>(null);
+  const integrationDropdownRef = useRef<HTMLDivElement>(null);
+  const uploaderDropdownRef = useRef<HTMLDivElement>(null);
+  const exportDropdownRef = useRef<HTMLDivElement>(null);
+  const actionDropdownRef = useRef<HTMLDivElement>(null);
 
   // Mock data for new components
   const mockDiffs = [
@@ -77,6 +109,30 @@ export default function LogicStudio() {
     }
   ];
 
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (vendorDropdownRef.current && !vendorDropdownRef.current.contains(event.target as Node)) {
+        setShowVendorDropdown(false);
+      }
+      if (integrationDropdownRef.current && !integrationDropdownRef.current.contains(event.target as Node)) {
+        setShowIntegrationDropdown(false);
+      }
+      if (uploaderDropdownRef.current && !uploaderDropdownRef.current.contains(event.target as Node)) {
+        setShowUploaderDropdown(false);
+      }
+      if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
+        setShowExportDropdown(false);
+      }
+      if (actionDropdownRef.current && !actionDropdownRef.current.contains(event.target as Node)) {
+        setShowActionDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-primary">
       {/* Header */}
@@ -107,11 +163,13 @@ export default function LogicStudio() {
           </div>
 
           {/* Monaco Editor */}
-          <STEditor
-            initialCode={prompt}
-            vendorType={vendor}
-            onChange={(code) => setPrompt(code)}
-          />
+          <div className="h-96 border border-light rounded-md overflow-hidden">
+            <STEditor
+              initialCode={editorCode}
+              vendorType={vendor}
+              onChange={(code) => setEditorCode(code)}
+            />
+          </div>
 
           {/* Pending Changes Panel */}
           <PendingChangesPanel
@@ -134,10 +192,27 @@ export default function LogicStudio() {
     onClick={() => {
       console.log("Refactoring logic...");
       // Show refactored code in editor
-      setPrompt(prevCode => {
-        // Basic refactoring simulation
-        return prevCode.replace(/\s+/g, ' ').trim();
+      setEditorCode(prevCode => {
+        // Basic refactoring simulation - improve formatting
+        const lines = prevCode.split('\n');
+        const formatted = lines.map(line => {
+          line = line.trim();
+          if (line.includes('IF ') || line.includes('ELSIF ')) {
+            return '  ' + line;
+          } else if (line.includes('END_IF') || line.includes('END_VAR') || line.includes('END_PROGRAM')) {
+            return line;
+          } else if (line.includes('VAR') || line.includes('PROGRAM')) {
+            return line;
+          } else if (line.startsWith('//')) {
+            return '  ' + line;
+          } else if (line.includes(':=')) {
+            return '    ' + line;
+          }
+          return '  ' + line;
+        });
+        return formatted.join('\n');
       });
+      alert("Code refactored! Formatting and indentation improved.");
     }}
     title="Improve formatting and structure"
     className="flex items-center gap-2 px-4 py-2 rounded-md bg-white border border-light shadow-sm text-sm hover:bg-accent-light transition"
@@ -173,12 +248,77 @@ export default function LogicStudio() {
         {/* Input Bar */}
         <div className="flex flex-wrap gap-4 items-start">
           {/* Prompt Input */}
-          <textarea
-            className="flex-1 border border-light rounded-md px-4 py-3 bg-surface shadow-sm text-sm text-primary placeholder-muted resize-none focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all min-h-[72px]"
-            placeholder="Describe your logic or upload docs to generate ST code..."
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-          />
+          <div className="flex-1 flex gap-2">
+            <textarea
+              className="flex-1 border border-light rounded-md px-4 py-3 bg-surface shadow-sm text-sm text-primary placeholder-muted resize-none focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all min-h-[72px]"
+              placeholder="Describe your logic or ask for modifications..."
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+            />
+            
+            {/* AI Action Dropdown */}
+            <div className="relative" ref={actionDropdownRef}>
+              <button
+                onClick={() => setShowActionDropdown(!showActionDropdown)}
+                className="border border-light bg-primary text-white px-4 py-3 rounded-md shadow-sm text-sm hover:bg-secondary transition-all flex items-center gap-2 min-h-[72px]"
+                title="AI Assistant Actions"
+              >
+                AI Assistant
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              {showActionDropdown && (
+                <div className="absolute mt-1 w-48 bg-white border border-light rounded-md shadow-lg z-10 right-0">
+                  <div
+                    onClick={() => {
+                      if (!prompt.trim()) {
+                        alert("Please enter a description of the logic you want to generate.");
+                        return;
+                      }
+                      console.log("Generating logic from prompt:", prompt);
+                      // Simulate logic generation
+                      const generatedLogic = `// Generated from: "${prompt}"
+PROGRAM Generated_Logic
+  VAR
+    // Auto-generated variables
+    Input_Signal : BOOL;
+    Output_Signal : BOOL;
+  END_VAR
+
+  // Generated logic based on prompt
+  Output_Signal := Input_Signal;
+
+END_PROGRAM`;
+                      setEditorCode(generatedLogic);
+                      setPrompt("");
+                      setShowActionDropdown(false);
+                      alert("Logic generated successfully! Review the code in the editor above.");
+                    }}
+                    className="px-4 py-3 text-sm hover:bg-accent-light cursor-pointer border-b border-light"
+                  >
+                    <div className="font-medium">Generate Logic</div>
+                    <div className="text-xs text-muted">Create new ST code from description</div>
+                  </div>
+                  <div
+                    onClick={() => {
+                      if (!prompt.trim()) {
+                        alert("Please enter your modification request.");
+                        return;
+                      }
+                      console.log("Editing logic via prompt:", prompt);
+                      // Simulate logic editing
+                      alert(`Modifying existing logic based on: "${prompt}"\n\nChanges applied to the editor.`);
+                      setPrompt("");
+                      setShowActionDropdown(false);
+                    }}
+                    className="px-4 py-3 text-sm hover:bg-accent-light cursor-pointer"
+                  >
+                    <div className="font-medium">Edit via Prompt</div>
+                    <div className="text-xs text-muted">Modify existing code with AI</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Vendor Style Dropdown */}
           <div className="relative">
@@ -211,14 +351,62 @@ export default function LogicStudio() {
           <button
             onClick={() => {
               console.log("Generating tags for", vendor);
-              // Navigate to Tag Database Manager - would need routing context in real app
-              window.location.hash = '#/tag-database-manager';
+              alert(`Generating tags for ${vendor} from current logic...\nTags will be created in Tag Database Manager.`);
             }}
             className="border border-light bg-white px-4 py-2 rounded-md shadow-sm text-sm text-primary hover:bg-accent-light transition-all"
             title="Auto-generate tags from the current logic"
           >
             Generate Tags
           </button>
+
+          {/* Export to Vendor Format Button */}
+          <div className="relative">
+            <button
+              onClick={() => setShowExportDropdown(!showExportDropdown)}
+              className="border border-light bg-white px-4 py-2 rounded-md shadow-sm text-sm text-primary hover:bg-accent-light transition-all flex items-center gap-2"
+              title="Export logic to vendor-specific format"
+            >
+              Export to {vendor}
+              <ChevronDown className="w-4 h-4" />
+            </button>
+            {showExportDropdown && (
+              <div className="absolute mt-1 w-48 bg-white border border-light rounded-md shadow-lg z-10">
+                <div
+                  onClick={() => {
+                    console.log(`Exporting to Rockwell format`);
+                    alert(`Exporting logic to Rockwell (.L5X) format...`);
+                    setShowExportDropdown(false);
+                  }}
+                  className="px-4 py-2 text-sm hover:bg-accent-light cursor-pointer flex items-center gap-2"
+                >
+                  <span className="w-3 h-3 bg-red-500 rounded"></span>
+                  Rockwell (.L5X)
+                </div>
+                <div
+                  onClick={() => {
+                    console.log(`Exporting to Siemens format`);
+                    alert(`Exporting logic to Siemens (.SCL) format...`);
+                    setShowExportDropdown(false);
+                  }}
+                  className="px-4 py-2 text-sm hover:bg-accent-light cursor-pointer flex items-center gap-2"
+                >
+                  <span className="w-3 h-3 bg-teal-500 rounded"></span>
+                  Siemens (.SCL)
+                </div>
+                <div
+                  onClick={() => {
+                    console.log(`Exporting to Beckhoff format`);
+                    alert(`Exporting logic to Beckhoff (.POU) format...`);
+                    setShowExportDropdown(false);
+                  }}
+                  className="px-4 py-2 text-sm hover:bg-accent-light cursor-pointer flex items-center gap-2"
+                >
+                  <span className="w-3 h-3 bg-orange-500 rounded"></span>
+                  Beckhoff (.POU)
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="flex space-x-4 items-center mt-4 ml-4">
             {/* Integrations Icon */}
@@ -388,19 +576,7 @@ export default function LogicStudio() {
       </main>
       <AIActionButtons />
 
-      {/* Floating AI Orb */}
-      <button
-        onClick={() => {
-          console.log("Opening AI assistant...");
-          // Navigate back to Pandaura AS
-          window.location.hash = '#/ask-pandaura';
-        }}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
-        title="Ask Pandaura Anything"
-      >
-        <Bot className="w-6 h-6 text-white" />
-      </button>
-      
+      <PandauraOrb />
 
     </div>
   );

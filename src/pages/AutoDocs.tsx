@@ -11,8 +11,10 @@ import {
   Eye,
   Bot,
   Plus,
-  Minus
+  Minus,
+  Zap
 } from "lucide-react";
+import PandauraOrb from "../components/PandauraOrb";
 
 interface DocumentCard {
   id: string;
@@ -395,15 +397,29 @@ export default function AutoDocs() {
                     />
                     <h3 className="font-medium text-sm">{doc.title}</h3>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedPreview(selectedPreview === doc.id ? null : doc.id);
-                    }}
-                    className="text-muted hover:text-primary"
-                  >
-                    <Eye className="w-4 h-4" />
-                  </button>
+                  <div className="flex flex-col gap-1">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedPreview(selectedPreview === doc.id ? null : doc.id);
+                      }}
+                      className="text-muted hover:text-primary"
+                      title="Preview"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log(`Generating ${doc.title}...`);
+                        alert(`Generating ${doc.title}...\nThis will create the document using current project data.`);
+                      }}
+                      className="text-accent hover:text-purple-600"
+                      title="Generate"
+                    >
+                      <Zap className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-1">
@@ -494,10 +510,7 @@ export default function AutoDocs() {
         )}
       </div>
 
-      {/* Floating AI Orb */}
-      <button className="fixed bottom-6 right-6 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform">
-        <Bot className="w-6 h-6 text-white" />
-      </button>
+      <PandauraOrb />
     </div>
   );
 }

@@ -21,6 +21,7 @@ import TagDatabaseManager from "../pages/TagDatabaseManager";
 import AutoDocs from "../pages/AutoDocs";
 import Projects from "../pages/Projects";
 import Profile from "../pages/Profile";
+import PandauraOrb from "../components/PandauraOrb";
 
 const tools = [
   "Pandaura AS",
@@ -249,7 +250,9 @@ export default function AskPandauraLayout() {
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-72 right-0 bg-white border-t px-6 py-4 shadow-md z-30">
+      <div className={`fixed bottom-0 right-0 bg-white border-t px-6 py-4 shadow-md z-30 transition-all duration-300 ${
+        sidebarOpen ? 'left-72' : 'left-16'
+      }`}>
         <div className="flex items-end gap-3 max-w-6xl mx-auto">
           <textarea
             value={chatMessage}
@@ -392,6 +395,7 @@ export default function AskPandauraLayout() {
         <div className="flex-1 overflow-y-auto">{renderContent()}</div>
       </div>
       {renderConversationsModal()}
+      <PandauraOrb />
     </div>
   );
 }

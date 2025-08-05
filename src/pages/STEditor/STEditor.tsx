@@ -147,9 +147,9 @@ export default function STEditor({ initialCode, vendorType, onChange }: Props) {
       )}
 
       {/* Monaco Editor */}
-      <div className="border border-light rounded shadow-sm">
+      <div className="border border-light rounded shadow-sm h-full">
         <MonacoEditor
-          height="280px"
+          height="100%"
           language="pascal"
           theme="vs-light"
           value={code}
@@ -168,6 +168,14 @@ export default function STEditor({ initialCode, vendorType, onChange }: Props) {
             glyphMargin: true,
             folding: true,
             lineNumbers: 'on',
+            scrollbar: {
+              vertical: 'visible',
+              horizontal: 'visible',
+              verticalScrollbarSize: 14,
+              horizontalScrollbarSize: 14,
+            },
+            wordWrap: 'on',
+            automaticLayout: true,
           }}
         />
       </div>

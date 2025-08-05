@@ -1,17 +1,30 @@
-import React, { useState } from "react";
-import { Plug, UploadCloud, User } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Plug, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function NavbarIcons() {
-  const [activeDropdown, setActiveDropdown] = useState<"integrations" | "uploader" | "profile" | null>(null);
+  const [activeDropdown, setActiveDropdown] = useState<"integrations" | "profile" | null>(null);
   const navigate = useNavigate();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const toggleDropdown = (type: typeof activeDropdown) => {
     setActiveDropdown(prev => (prev === type ? null : type));
   };
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setActiveDropdown(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
-    <div className="flex space-x-4 items-center relative">
+    <div ref={containerRef} className="flex space-x-4 items-center relative">
       {/* Integrations Icon */}
       <div className="relative">
         <button
@@ -82,35 +95,7 @@ export default function NavbarIcons() {
         )}
       </div>
 
-      {/* Smart Uploader Icon */}
-      <div className="relative">
-        <button
-          onClick={() => toggleDropdown("uploader")}
-          title="Smart Document Uploader"
-          className="p-2 rounded hover:bg-gray-200"
-        >
-          <UploadCloud className="w-5 h-5" />
-        </button>
-        {activeDropdown === "uploader" && (
-          <div 
-            onClick={() => {
-              console.log("Opening document uploader...");
-              // Trigger file upload dialog
-              setActiveDropdown(null);
-            }}
-            className="absolute right-0 mt-2 w-64 bg-white rounded shadow-lg p-3 text-sm z-50 cursor-pointer hover:bg-gray-50"
-          >
-            <div className="font-semibold mb-2">Accepted File Types</div>
-            <ul className="list-disc list-inside space-y-1">
-              <li>.pdf, .doc, .docx</li>
-              <li>.xls, .xlsx, .txt</li>
-              <li>.l5x, .scl, .xml</li>
-              <li>.tsproj, .tpy</li>
-            </ul>
-            <div className="mt-2 text-xs text-muted">Click to upload files</div>
-          </div>
-        )}
-      </div>
+
 
       {/* Profile Icon */}
       <div className="relative">

@@ -17,6 +17,7 @@ import {
   Eye,
   EyeOff
 } from "lucide-react";
+import PandauraOrb from "../components/PandauraOrb";
 
 interface Project {
   id: string;
@@ -190,8 +191,8 @@ export default function Projects() {
   const getVendorColor = (vendor: string) => {
     switch (vendor) {
       case 'Rockwell': return 'bg-red-100 text-red-700';
-      case 'Siemens': return 'bg-blue-100 text-blue-700';
-      case 'Beckhoff': return 'bg-green-100 text-green-700';
+      case 'Siemens': return 'bg-teal-100 text-teal-700';
+      case 'Beckhoff': return 'bg-orange-100 text-orange-700';
       default: return 'bg-gray-100 text-gray-600';
     }
   };
@@ -532,6 +533,7 @@ export default function Projects() {
           </div>
         </div>
       )}
+      <PandauraOrb />
     </div>
   );
 }

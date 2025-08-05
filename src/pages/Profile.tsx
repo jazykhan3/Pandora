@@ -21,6 +21,7 @@ import {
   ArrowLeft
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import PandauraOrb from "../components/PandauraOrb";
 
 interface UserProfile {
   name: string;
@@ -591,6 +592,7 @@ export default function Profile() {
           )}
         </main>
       </div>
+      <PandauraOrb />
     </div>
   );
 }
