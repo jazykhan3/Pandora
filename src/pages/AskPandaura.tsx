@@ -99,7 +99,7 @@ export default function AskPandaura({ sessionMode = false }: AskPandauraProps) {
 
   return (
     <div className="flex flex-col bg-white h-full relative">
-      <div className="p-6 max-w-4xl mx-auto flex-1">
+      <div className="p-6 max-w-4xl mx-auto flex-1 pb-32">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-primary">Pandaura AS</h1>

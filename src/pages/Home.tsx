@@ -154,17 +154,17 @@ export default function Home() {
                       : 'hover:border-accent hover:shadow-sm'
                   }`}
                 >
-                  <div className="relative flex items-center">
-                    <tool.icon className="w-5 h-5 text-accent flex-shrink-0" />
-                    {tool.comingSoon && (
-                      <div className="ml-2 bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full border border-green-200 whitespace-nowrap">
-                        Coming Soon
-                      </div>
-                    )}
-                  </div>
+                  <tool.icon className="w-5 h-5 text-accent flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-medium text-primary">{tool.name}</h4>
-                    <p className="text-xs text-muted truncate">{tool.description}</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="text-sm font-medium text-primary">{tool.name}</h4>
+                      {tool.comingSoon && (
+                        <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full border border-green-200 whitespace-nowrap">
+                          Coming Soon
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted">{tool.description}</p>
                   </div>
                   {!tool.comingSoon && <ArrowRight className="w-4 h-4 text-muted flex-shrink-0" />}
                 </button>
