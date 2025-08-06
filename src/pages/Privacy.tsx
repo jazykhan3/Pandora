@@ -103,7 +103,7 @@ export default function Privacy() {
     },
     {
       id: "diagnostics",
-      title: "Troubleshooting & Diagnostics (Optional)",
+      title: "Troubleshooting & Diagnostics",
       icon: "🔧",
       content: (
         <div className="space-y-4">
