@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import STEditor from "../pages/STEditor/STEditor";
 import AIActionButtons from "../pages/AIActionButtons";
 import AISuggestedAutocomplete from "../pages/AISuggestedAutocomplete";
@@ -75,23 +75,32 @@ END_PROGRAM`);
     }
   ];
 
-  // Auto-save state changes (only in non-session mode)
-  useEffect(() => {
-    if (!sessionMode) {
-      const timeoutId = setTimeout(() => {
-        saveModuleState('LogicStudio', {
-          prompt,
-          editorCode,
-          vendor,
-          showPendingChanges,
-          showAISuggestions,
-          vendorContextEnabled
-        });
-      }, 1000); // Auto-save after 1 second of inactivity
+  // Debounced auto-save (only in non-session mode)
+  const debouncedSave = useCallback(
+    (() => {
+      let timeoutId: number;
+      return () => {
+        if (!sessionMode) {
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => {
+            saveModuleState('LogicStudio', {
+              prompt,
+              editorCode,
+              vendor,
+              showPendingChanges,
+              showAISuggestions,
+              vendorContextEnabled
+            });
+          }, 1000);
+        }
+      };
+    })(),
+    [sessionMode, saveModuleState, prompt, editorCode, vendor, showPendingChanges, showAISuggestions, vendorContextEnabled]
+  );
 
-      return () => clearTimeout(timeoutId);
-    }
-  }, [prompt, editorCode, vendor, showPendingChanges, showAISuggestions, vendorContextEnabled, sessionMode, saveModuleState]);
+  useEffect(() => {
+    debouncedSave();
+  }, [debouncedSave]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -105,7 +114,7 @@ END_PROGRAM`);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleGenerateLogic = () => {
+  const handleGenerateLogic = useCallback(() => {
     if (!prompt.trim()) {
       alert("Please enter a description of the logic you want to generate.");
       return;
@@ -135,14 +144,14 @@ END_PROGRAM`;
     setEditorCode(generatedLogic);
     setPrompt("");
     alert("Logic generated successfully! Review the code in the editor above.");
-  };
+  }, [prompt]);
 
-  const handlePromptKeyPress = (e: React.KeyboardEvent) => {
+  const handlePromptKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleGenerateLogic();
     }
-  };
+  }, [handleGenerateLogic]);
 
   return (
     <div className="flex flex-col h-full bg-background text-primary">
@@ -155,7 +164,7 @@ END_PROGRAM`;
       </header>
 
       {/* Main Workspace */}
-      <main className="flex-1 flex flex-col gap-6 p-6">
+      <main className="flex-1 flex flex-col gap-6 p-6 will-change-scroll" style={{ scrollBehavior: 'smooth' }}>
         {/* Top Section - Search Bar */}
         <div className="flex justify-end">
           <RoutineSearchbar

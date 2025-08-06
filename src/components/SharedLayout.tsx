@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Menu,
@@ -58,15 +58,15 @@ export default function SharedLayout({ children }: SharedLayoutProps) {
     return tool?.name || "Pandaura AS";
   };
 
-  const handleToolClick = (toolPath: string) => {
+  const handleToolClick = useCallback((toolPath: string) => {
     navigate(toolPath);
-  };
+  }, [navigate]);
 
-  const handleLogoClick = () => {
+  const handleLogoClick = useCallback(() => {
     setShowSaveModal(true);
-  };
+  }, []);
 
-  const handleSaveAndGoHome = () => {
+  const handleSaveAndGoHome = useCallback(() => {
     // Trigger final save for current module
     const currentTool = getCurrentTool();
     console.log(`Auto-saving ${currentTool} progress...`);
@@ -76,12 +76,12 @@ export default function SharedLayout({ children }: SharedLayoutProps) {
     
     setShowSaveModal(false);
     navigate('/home');
-  };
+  }, [navigate]);
 
-  const handleGoHomeWithoutSaving = () => {
+  const handleGoHomeWithoutSaving = useCallback(() => {
     setShowSaveModal(false);
     navigate('/home');
-  };
+  }, [navigate]);
 
   const renderHeader = () => {
     const hostInfo = getHostInfo();
@@ -126,11 +126,12 @@ export default function SharedLayout({ children }: SharedLayoutProps) {
     );
   };
 
-  const renderSidebar = () => (
+  const renderSidebar = useMemo(() => (
     <div
-      className={`h-full overflow-y-auto scrollbar-hide bg-gray-light border-r border-light shadow-card p-2 space-y-4 transition-all duration-300 ${
+      className={`h-full overflow-y-auto scrollbar-hide bg-gray-light border-r border-light shadow-card p-2 space-y-4 transition-all duration-200 will-change-transform ${
         sidebarOpen ? "w-72" : "w-16"
       }`}
+      style={{ scrollBehavior: 'smooth' }}
     >
       <button
         className="text-secondary mb-2 focus:outline-none hover:text-primary transition-colors"
@@ -147,7 +148,7 @@ export default function SharedLayout({ children }: SharedLayoutProps) {
           <div key={tool.name}>
             <div
               onClick={() => handleToolClick(tool.path)}
-              className={`flex items-center ${!sidebarOpen ? "justify-center" : ""} cursor-pointer py-3 rounded-md transition-all ${
+              className={`flex items-center ${!sidebarOpen ? "justify-center" : ""} cursor-pointer py-3 rounded-md transition-colors duration-150 ${
                 isActive
                   ? " text-primary shadow-sm"
                   : "hover:bg-gray hover:text-primary hover:shadow-sm"
@@ -170,7 +171,7 @@ export default function SharedLayout({ children }: SharedLayoutProps) {
         );
       })}
     </div>
-  );
+  ), [sidebarOpen, location.pathname, handleToolClick]);
 
   const renderSaveModal = () => (
     showSaveModal && (
@@ -211,8 +212,8 @@ export default function SharedLayout({ children }: SharedLayoutProps) {
     <div className="flex flex-col h-screen bg-background text-primary">
       {renderHeader()}
       <div className="flex flex-1 overflow-hidden min-w-0">
-        {renderSidebar()}
-        <div className="flex-1 overflow-y-auto">{children}</div>
+        {renderSidebar}
+        <div className="flex-1 overflow-y-auto will-change-scroll" style={{ scrollBehavior: 'smooth' }}>{children}</div>
       </div>
       <PandauraOrb />
       {renderSaveModal()}

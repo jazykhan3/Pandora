@@ -22,6 +22,32 @@ export default function AskPandaura({ sessionMode = false }: AskPandauraProps) {
   const moduleState = getModuleState('AskPandaura');
   const [chatMessage, setChatMessage] = useState(moduleState.chatMessage || "");
   const [showConversationsModal, setShowConversationsModal] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Detect sidebar state changes
+  useEffect(() => {
+    const detectSidebarState = () => {
+      const sidebar = document.querySelector('[class*="w-72"], [class*="w-16"]');
+      if (sidebar) {
+        const isCollapsed = sidebar.classList.contains('w-16');
+        setSidebarCollapsed(isCollapsed);
+      }
+    };
+
+    // Initial detection with a small delay to ensure DOM is ready
+    setTimeout(detectSidebarState, 100);
+    
+    // Listen for sidebar changes
+    const observer = new MutationObserver(detectSidebarState);
+    const targetNode = document.body; // Watch the whole body for changes
+    observer.observe(targetNode, { 
+      attributes: true, 
+      attributeFilter: ['class'], 
+      subtree: true 
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   // Auto-save state changes (only in non-session mode)
   useEffect(() => {
@@ -101,7 +127,7 @@ export default function AskPandaura({ sessionMode = false }: AskPandauraProps) {
 
   return (
     <div className="flex flex-col bg-white h-full relative">
-      <div className="p-6 max-w-4xl mx-auto flex-1 pb-32">
+      <div className="p-6 max-w-4xl mx-auto flex-1 pb-24">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-primary">Pandaura AS</h1>
@@ -133,7 +159,7 @@ export default function AskPandaura({ sessionMode = false }: AskPandauraProps) {
           </p>
         </div>
 
-        <div className="space-y-4 mt-8">
+        <div className="space-y-4 mt-8 scrollable-container optimized-text">
           <div className="bg-gray-100 rounded-md px-4 py-3 text-sm text-left">
             <span className="font-medium text-primary">You:</span> I need to create a motor starter logic with safety interlocks for a conveyor system. Can you help me generate the structured text code for Rockwell PLC?
           </div>
@@ -174,7 +200,9 @@ export default function AskPandaura({ sessionMode = false }: AskPandauraProps) {
       </div>
 
       {/* Fixed Bottom Input */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t px-6 py-4 shadow-md z-30">
+      <div className={`fixed bottom-0 right-0 bg-white border-t px-6 py-4 shadow-md z-30 transition-all duration-200 ${
+        sidebarCollapsed ? 'left-16' : 'left-72'
+      }`}>
         <div className="flex items-end gap-3 max-w-4xl mx-auto">
           <textarea
             value={chatMessage}

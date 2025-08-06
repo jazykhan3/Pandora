@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 
 interface ModuleState {
   [key: string]: any;
@@ -28,37 +28,54 @@ interface ModuleStateProviderProps {
 export const ModuleStateProvider: React.FC<ModuleStateProviderProps> = ({ children }) => {
   const [moduleStates, setModuleStates] = useState<Record<string, ModuleState>>({});
 
-  const getModuleState = (moduleName: string) => {
+  const getModuleState = useCallback((moduleName: string) => {
     return moduleStates[moduleName] || {};
-  };
+  }, [moduleStates]);
 
-  const setModuleState = (moduleName: string, state: any) => {
-    setModuleStates(prev => ({
-      ...prev,
-      [moduleName]: { ...prev[moduleName], ...state }
-    }));
-  };
-
-  const clearModuleState = (moduleName: string) => {
+  const setModuleState = useCallback((moduleName: string, state: any) => {
     setModuleStates(prev => {
+      // Only update if state actually changed
+      const currentState = prev[moduleName] || {};
+      const newState = { ...currentState, ...state };
+      
+      // Shallow comparison to avoid unnecessary updates
+      if (JSON.stringify(currentState) === JSON.stringify(newState)) {
+        return prev;
+      }
+      
+      return {
+        ...prev,
+        [moduleName]: newState
+      };
+    });
+  }, []);
+
+  const clearModuleState = useCallback((moduleName: string) => {
+    setModuleStates(prev => {
+      if (!prev[moduleName]) return prev; // No change needed
+      
       const newStates = { ...prev };
       delete newStates[moduleName];
       return newStates;
     });
-  };
+  }, []);
 
-  const saveModuleState = (moduleName: string, state: any) => {
-    // Auto-save to localStorage for persistence across sessions
-    try {
-      const savedStates = JSON.parse(localStorage.getItem('pandaura_module_states') || '{}');
-      savedStates[moduleName] = state;
-      localStorage.setItem('pandaura_module_states', JSON.stringify(savedStates));
-    } catch (error) {
-      console.warn('Failed to save module state to localStorage:', error);
-    }
+  const saveModuleState = useCallback((moduleName: string, state: any) => {
+    // Debounced save to localStorage
+    const timeoutId = setTimeout(() => {
+      try {
+        const savedStates = JSON.parse(localStorage.getItem('pandaura_module_states') || '{}');
+        savedStates[moduleName] = state;
+        localStorage.setItem('pandaura_module_states', JSON.stringify(savedStates));
+      } catch (error) {
+        console.warn('Failed to save module state to localStorage:', error);
+      }
+    }, 100); // 100ms debounce
     
     setModuleState(moduleName, state);
-  };
+    
+    return () => clearTimeout(timeoutId);
+  }, [setModuleState]);
 
   // Load states from localStorage on initialization
   React.useEffect(() => {
@@ -70,13 +87,15 @@ export const ModuleStateProvider: React.FC<ModuleStateProviderProps> = ({ childr
     }
   }, []);
 
+  const contextValue = useMemo(() => ({
+    getModuleState,
+    setModuleState,
+    clearModuleState,
+    saveModuleState
+  }), [getModuleState, setModuleState, clearModuleState, saveModuleState]);
+
   return (
-    <ModuleStateContext.Provider value={{
-      getModuleState,
-      setModuleState,
-      clearModuleState,
-      saveModuleState
-    }}>
+    <ModuleStateContext.Provider value={contextValue}>
       {children}
     </ModuleStateContext.Provider>
   );
