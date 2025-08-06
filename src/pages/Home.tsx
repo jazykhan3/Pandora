@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import logo from "../assets/logop.png";
 import NavbarIcons from "./NavbarIcons";
+import { Card, Button } from "../components/ui";
 
 const quickTools = [
   {
@@ -87,18 +88,8 @@ export default function Home() {
         {/* Main Options */}
         <div className="grid md:grid-cols-2 gap-8 mb-16">
           {/* Full Project Workflow */}
-          <div className="bg-surface border border-light rounded-lg p-8 shadow-card">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FolderOpen className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="text-2xl font-semibold text-primary mb-2">
-                Start Full Project Workflow
-              </h3>
-              <p className="text-muted">
-                Access all modules with persistent history, tagging, and AI memory.
-              </p>
-            </div>
+          <Card variant="elevated" icon={FolderOpen} title="Start Full Project Workflow" subtitle="Access all modules with persistent history, tagging, and AI memory." className="text-center">
+            <div>
             
             {/* Recent Projects */}
             {recentProjects.length > 0 && (
@@ -124,27 +115,21 @@ export default function Home() {
               </div>
             )}
 
-            <button
+            <Button
               onClick={() => navigate("/app")}
-              className="w-full bg-primary hover:bg-secondary text-white py-4 px-6 rounded-md shadow-sm transition-all duration-200 flex items-center justify-center gap-2 font-medium"
+              className="w-full py-4"
+              icon={ArrowRight}
+              iconPosition="right"
+              size="lg"
             >
               Start Full Project Workflow
-              <ArrowRight className="w-5 h-5" />
-            </button>
-          </div>
+            </Button>
+            </div>
+          </Card>
 
           {/* Quick Tools */}
-          <div className="bg-surface border border-light rounded-lg p-8 shadow-card">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Zap className="w-8 h-8 text-accent" />
-              </div>
-              <h3 className="text-2xl font-semibold text-primary mb-2">
-                Quick Tools
-              </h3>
-              <p className="text-muted mb-4">
-                Single-use sessions for quick tasks and testing.
-              </p>
+          <Card variant="elevated" icon={Zap} title="Quick Tools" subtitle="Single-use sessions for quick tasks and testing." className="text-center">
+            <div className="mb-6">
               <p className="text-xs text-secondary bg-background rounded-md p-3 border border-light">
                 These tools are available for one-time use. You can upload files, use all features, 
                 and export results — but your session will not be saved.
@@ -167,7 +152,7 @@ export default function Home() {
                 </button>
               ))}
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Divider */}

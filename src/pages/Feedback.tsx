@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { ArrowLeft, Send, CheckCircle, AlertCircle, Loader } from "lucide-react";
+import { Send, Loader } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { PageHeader, Card, Textarea, Button, Alert } from "../components/ui";
 
 export default function Feedback() {
   const navigate = useNavigate();
@@ -72,22 +73,11 @@ export default function Feedback() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-surface border-b border-light px-6 py-4">
-        <div className="max-w-4xl mx-auto flex items-center gap-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2 hover:bg-background rounded-md transition-colors"
-            title="Go back"
-          >
-            <ArrowLeft className="w-5 h-5 text-secondary" />
-          </button>
-          <div>
-            <h1 className="text-xl font-semibold text-primary">Feedback</h1>
-            <p className="text-sm text-secondary">Help us improve Pandaura AS</p>
-          </div>
-        </div>
-      </header>
+      <PageHeader
+        title="Feedback"
+        subtitle="Help us improve Pandaura AS"
+        showBackButton
+      />
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-6 py-8">
@@ -100,101 +90,56 @@ export default function Feedback() {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* App Feedback */}
-          <div className="bg-surface border border-light rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-primary mb-2">
-              Your thoughts on the app
-            </h3>
-            <p className="text-sm text-muted mb-4">
-              What's been working well? What's been frustrating? Tell us anything about your experience with Pandaura.
-            </p>
-            <textarea
+          <Card title="Your thoughts on the app" subtitle="What's been working well? What's been frustrating? Tell us anything about your experience with Pandaura.">
+            <Textarea
               value={appFeedback}
               onChange={(e) => setAppFeedback(e.target.value)}
-              className="w-full px-4 py-3 bg-background border border-light rounded-md text-primary placeholder-muted resize-none focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
               placeholder="Share your experience with the app..."
               rows={6}
               maxLength={2000}
+              helpText="Optional • Be as detailed as you'd like"
+              showCharCount
             />
-            <div className="flex justify-between items-center mt-2">
-              <span className="text-xs text-muted">
-                Optional • Be as detailed as you'd like
-              </span>
-              <span className="text-xs text-muted">
-                {appFeedback.length}/2000
-              </span>
-            </div>
-          </div>
+          </Card>
 
           {/* AI Feedback */}
-          <div className="bg-surface border border-light rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-primary mb-2">
-              Your thoughts on the AI
-            </h3>
-            <p className="text-sm text-muted mb-4">
-              How helpful has the AI been for you? Any moments it surprised you—or totally missed the mark?
-            </p>
-            <textarea
+          <Card title="Your thoughts on the AI" subtitle="How helpful has the AI been for you? Any moments it surprised you—or totally missed the mark?">
+            <Textarea
               value={aiFeedback}
               onChange={(e) => setAiFeedback(e.target.value)}
-              className="w-full px-4 py-3 bg-background border border-light rounded-md text-primary placeholder-muted resize-none focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
               placeholder="Tell us about your AI assistant experience..."
               rows={6}
               maxLength={2000}
+              helpText="Optional • We're always improving the AI"
+              showCharCount
             />
-            <div className="flex justify-between items-center mt-2">
-              <span className="text-xs text-muted">
-                Optional • We're always improving the AI
-              </span>
-              <span className="text-xs text-muted">
-                {aiFeedback.length}/2000
-              </span>
-            </div>
-          </div>
+          </Card>
 
           {/* Advanced Feedback */}
-          <div className="bg-surface border border-light rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-primary mb-2">
-              Want to go deeper?
-            </h3>
-            <p className="text-sm text-muted mb-4">
-              If you've got technical notes, feature requests, or specific examples — we'd love to hear them here.
-            </p>
-            <textarea
+          <Card title="Want to go deeper?" subtitle="If you've got technical notes, feature requests, or specific examples — we'd love to hear them here.">
+            <Textarea
               value={advancedFeedback}
               onChange={(e) => setAdvancedFeedback(e.target.value)}
-              className="w-full px-4 py-3 bg-background border border-light rounded-md text-primary placeholder-muted resize-none focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all"
               placeholder="Share technical feedback, feature requests, or specific examples..."
               rows={6}
               maxLength={3000}
+              helpText="Optional • Technical details welcome"
+              showCharCount
             />
-            <div className="flex justify-between items-center mt-2">
-              <span className="text-xs text-muted">
-                Optional • Technical details welcome
-              </span>
-              <span className="text-xs text-muted">
-                {advancedFeedback.length}/3000
-              </span>
-            </div>
-          </div>
+          </Card>
 
           {/* Submit Section */}
-          <div className="bg-surface border border-light rounded-lg p-6">
+          <Card>
             {submitStatus === 'success' && (
-              <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-md flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                <span className="text-green-800">
-                  Thanks — we seriously read every message. ✅
-                </span>
-              </div>
+              <Alert variant="success" className="mb-4">
+                Thanks — we seriously read every message. ✅
+              </Alert>
             )}
 
             {submitStatus === 'error' && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 text-red-600" />
-                <span className="text-red-800">
-                  Something went wrong. Try again or email us directly at pandauracares@mail.com. ❌
-                </span>
-              </div>
+              <Alert variant="error" className="mb-4">
+                Something went wrong. Try again or email us directly at pandauracares@mail.com. ❌
+              </Alert>
             )}
 
             <div className="flex items-center justify-between">
@@ -202,25 +147,16 @@ export default function Feedback() {
                 Your feedback goes directly to <span className="font-mono">pandauracares@mail.com</span>
               </p>
               
-              <button
+              <Button
                 type="submit"
                 disabled={!hasContent || isSubmitting}
-                className="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-md shadow-sm transition-all duration-200 flex items-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                loading={isSubmitting}
+                icon={isSubmitting ? Loader : Send}
               >
-                {isSubmitting ? (
-                  <>
-                    <Loader className="w-4 h-4 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-4 h-4" />
-                    Send Feedback
-                  </>
-                )}
-              </button>
+                {isSubmitting ? 'Sending...' : 'Send Feedback'}
+              </Button>
             </div>
-          </div>
+          </Card>
         </form>
 
         {/* Footer Note */}
