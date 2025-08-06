@@ -7,6 +7,7 @@ import {
   FileText,
   Database,
   Download,
+  BookOpen,
 } from "lucide-react";
 import logo from "../assets/logop.png";
 import NavbarIcons from "../pages/NavbarIcons";
@@ -18,6 +19,7 @@ const tools = [
   { name: "AutoDocs", path: "/autodocs", icon: FileText },
   { name: "Tag Database Manager", path: "/tag-database", icon: Database },
   { name: "Projects", path: "/projects", icon: Download },
+  { name: "Case Study Generator", path: "/case-studies", icon: BookOpen },
 ] as const;
 
 const toolDescriptions = {
@@ -35,6 +37,9 @@ const toolDescriptions = {
   ],
   "Projects": [
     "Manage and organize your automation projects, files, and collaborative workspaces.",
+  ],
+  "Case Study Generator": [
+    "Create professional case studies from your automation projects and share success stories.",
   ],
 };
 

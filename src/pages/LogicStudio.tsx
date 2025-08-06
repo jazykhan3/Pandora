@@ -15,7 +15,11 @@ import {
 
 const vendorOptions = ["Rockwell", "Siemens", "Beckhoff"];
 
-export default function LogicStudio() {
+interface LogicStudioProps {
+  sessionMode?: boolean;
+}
+
+export default function LogicStudio({ sessionMode = false }: LogicStudioProps) {
   const [prompt, setPrompt] = useState("");
   const [editorCode, setEditorCode] = useState(`PROGRAM Main
   VAR

@@ -8,7 +8,11 @@ import {
 } from "lucide-react";
 import pandauraLogo from "../assets/logo.png";
 
-export default function AskPandaura() {
+interface AskPandauraProps {
+  sessionMode?: boolean;
+}
+
+export default function AskPandaura({ sessionMode = false }: AskPandauraProps) {
   const [chatMessage, setChatMessage] = useState("");
   const [showConversationsModal, setShowConversationsModal] = useState(false);
 

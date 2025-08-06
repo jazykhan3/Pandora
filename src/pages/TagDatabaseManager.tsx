@@ -15,7 +15,11 @@ interface Tag {
   isAIGenerated: boolean;
 }
 
-export default function TagDatabaseManager() {
+interface TagDatabaseManagerProps {
+  sessionMode?: boolean;
+}
+
+export default function TagDatabaseManager({ sessionMode = false }: TagDatabaseManagerProps) {
   const [showVendorDropdown, setShowVendorDropdown] = useState(false);
   const [editingTag, setEditingTag] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");

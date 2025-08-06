@@ -44,7 +44,11 @@ interface ClientInfo {
   integratorCompany: string;
 }
 
-export default function AutoDocs() {
+interface AutoDocsProps {
+  sessionMode?: boolean;
+}
+
+export default function AutoDocs({ sessionMode = false }: AutoDocsProps) {
   const [logicSource, setLogicSource] = useState("logic-studio");
   const [showUploadPanel, setShowUploadPanel] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
