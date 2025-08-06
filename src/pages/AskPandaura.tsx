@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import pandauraLogo from "../assets/logo.png";
 import { useModuleState } from "../contexts/ModuleStateContext";
+import { useNavigate } from "react-router-dom";
 
 interface AskPandauraProps {
   sessionMode?: boolean;
@@ -15,6 +16,7 @@ interface AskPandauraProps {
 
 export default function AskPandaura({ sessionMode = false }: AskPandauraProps) {
   const { getModuleState, saveModuleState } = useModuleState();
+  const navigate = useNavigate();
   
   // Get persisted state or use defaults
   const moduleState = getModuleState('AskPandaura');
@@ -155,13 +157,13 @@ export default function AskPandaura({ sessionMode = false }: AskPandauraProps) {
             <br/><br/>
             <div className="flex gap-2 mt-3">
               <button 
-                onClick={() => window.location.href = '/logic-studio'}
+                onClick={() => navigate('/logic-studio')}
                 className="bg-primary text-white px-3 py-1 rounded text-xs hover:bg-secondary transition-colors"
               >
                 → Open in Logic Studio
               </button>
               <button 
-                onClick={() => window.location.href = '/tag-database'}
+                onClick={() => navigate('/tag-database')}
                 className="bg-white border border-light px-3 py-1 rounded text-xs hover:bg-accent-light transition-colors"
               >
                 📋 Generate Tag Database

@@ -13,6 +13,7 @@ import logo from "../assets/logo.png";
 import NavbarIcons from "../pages/NavbarIcons";
 import PandauraOrb from "../components/PandauraOrb";
 import { useModuleState } from "../contexts/ModuleStateContext";
+import { config, getHostInfo, isOffline } from "../config/environment";
 
 const tools = [
   { name: "Pandaura AS", path: "/pandaura-as", icon: MessageCircle },
@@ -82,27 +83,48 @@ export default function SharedLayout({ children }: SharedLayoutProps) {
     navigate('/home');
   };
 
-  const renderHeader = () => (
-    <header className="flex items-center justify-between bg-surface px-6 py-4 border-b border-light shadow">
-      <div className="flex items-center gap-3">
-        <button 
-          onClick={handleLogoClick} 
-          className="hover:opacity-80 transition-opacity"
-          title="Go to Home"
-        >
-          <img 
-            src={logo} 
-            alt="Pandaura Logo" 
-            className="h-16 w-auto filter-none" 
-            style={{ filter: 'none', imageRendering: 'crisp-edges' }}
-          />
-        </button>
-      </div>
-      <div className="flex items-center space-x-4">
-        <NavbarIcons />
-      </div>
-    </header>
-  );
+  const renderHeader = () => {
+    const hostInfo = getHostInfo();
+    const offline = isOffline();
+    
+    return (
+      <header className="flex items-center justify-between bg-surface px-6 py-4 border-b border-light shadow">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={handleLogoClick} 
+            className="hover:opacity-80 transition-opacity"
+            title="Go to Home"
+          >
+            <img 
+              src={logo} 
+              alt="Pandaura Logo" 
+              className="h-16 w-auto filter-none" 
+              style={{ filter: 'none', imageRendering: 'crisp-edges' }}
+            />
+          </button>
+          {config.onPremise.showStatus && (
+            <div className="flex flex-col text-xs">
+              <span className="text-primary font-medium">
+                {config.appTitle}
+              </span>
+              <span className="text-muted">
+                Running on {hostInfo.displayUrl}
+                {offline && " (Offline Mode)"}
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="flex items-center space-x-4">
+          {offline && (
+            <div className="bg-yellow-100 border border-yellow-200 text-yellow-800 px-2 py-1 rounded text-xs">
+              Offline Mode
+            </div>
+          )}
+          <NavbarIcons />
+        </div>
+      </header>
+    );
+  };
 
   const renderSidebar = () => (
     <div
