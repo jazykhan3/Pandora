@@ -142,8 +142,8 @@ export default function NavbarIcons() {
               </li>
               <li 
                 onClick={() => {
-                  console.log("Navigating to case studies...");
-                  navigate('/case-studies');
+                  console.log("Navigating to case study library...");
+                  navigate('/case-study-library');
                   setActiveDropdown(null);
                 }}
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"

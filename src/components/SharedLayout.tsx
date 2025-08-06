@@ -87,7 +87,7 @@ export default function SharedLayout({ children }: SharedLayoutProps) {
       <div className="flex items-center gap-3">
         <button 
           onClick={handleLogoClick} 
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          className="hover:opacity-80 transition-opacity"
           title="Go to Home"
         >
           <img 
@@ -96,7 +96,6 @@ export default function SharedLayout({ children }: SharedLayoutProps) {
             className="h-16 w-auto filter-none" 
             style={{ filter: 'none', imageRendering: 'crisp-edges' }}
           />
-          <span className="text-lg font-bold text-primary">Pandaura</span>
         </button>
       </div>
       <div className="flex items-center space-x-4">

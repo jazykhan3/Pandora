@@ -31,6 +31,9 @@ interface FormSection {
 export default function CaseStudies() {
   const navigate = useNavigate();
   
+  // Tooltip state
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+  
   // Mock existing case studies
   const [caseStudies] = useState<CaseStudy[]>([
     { id: '1', title: 'Water Treatment Automation', status: 'completed', lastModified: '2 days ago' },
@@ -70,6 +73,59 @@ export default function CaseStudies() {
   });
 
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+
+  // Tooltip content
+  const tooltips = {
+    selectProject: "Link this case study to an existing project for automatic data import",
+    projectTitle: "Give your case study a clear, descriptive title that highlights the key achievement",
+    plcPlatforms: "Select all PLC platforms that were used in this project",
+    scopeSummary: "Briefly describe what the project covered - scope, systems involved, and scale",
+    finalOutcome: "Describe the successful completion and measurable results of the project",
+    uploadFiles: "Upload project documentation, screenshots, or technical diagrams (max 10MB each)"
+  };
+
+  // Tooltip component
+  const Tooltip = ({ id, content }: { id: string; content: string }) => {
+    const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+    const iconRef = React.useRef<HTMLDivElement>(null);
+
+    const handleMouseEnter = () => {
+      if (iconRef.current) {
+        const rect = iconRef.current.getBoundingClientRect();
+        setTooltipPosition({
+          x: rect.left + rect.width / 2,
+          y: rect.top - 10
+        });
+      }
+      setActiveTooltip(id);
+    };
+
+    return (
+      <>
+        <div ref={iconRef} className="relative inline-block">
+          <Info 
+            className="w-4 h-4 inline ml-1 text-muted hover:text-primary cursor-help transition-colors" 
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={() => setActiveTooltip(null)}
+          />
+        </div>
+        {activeTooltip === id && (
+          <div 
+            className="fixed px-3 py-2 bg-gray-900 text-white text-xs rounded-md whitespace-nowrap shadow-lg pointer-events-none"
+            style={{
+              left: `${tooltipPosition.x}px`,
+              top: `${tooltipPosition.y}px`,
+              transform: 'translate(-50%, -100%)',
+              zIndex: 99999
+            }}
+          >
+            {content}
+            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+          </div>
+        )}
+      </>
+    );
+  };
 
   const toggleSection = (sectionId: string) => {
     setFormSections(prev => prev.map(section => 
@@ -163,7 +219,7 @@ export default function CaseStudies() {
             <div>
               <label className="block text-sm font-medium text-secondary mb-2">
                 Select Project (Optional)
-                <Info className="w-4 h-4 inline ml-1 text-muted" />
+                <Tooltip id="selectProject" content={tooltips.selectProject} />
               </label>
               <select
                 value={selectedProject}
@@ -247,7 +303,7 @@ export default function CaseStudies() {
                           <div>
                             <label className="block text-sm font-medium text-secondary mb-2">
                               Project Title
-                              <Info className="w-4 h-4 inline ml-1 text-muted" />
+                              <Tooltip id="projectTitle" content={tooltips.projectTitle} />
                             </label>
                             <input
                               type="text"
@@ -300,7 +356,7 @@ export default function CaseStudies() {
                         <div>
                           <label className="block text-sm font-medium text-secondary mb-2">
                             PLC Platforms Used
-                            <Info className="w-4 h-4 inline ml-1 text-muted" />
+                            <Tooltip id="plcPlatforms" content={tooltips.plcPlatforms} />
                           </label>
                           <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
                             {platforms.map(platform => (
@@ -320,7 +376,7 @@ export default function CaseStudies() {
                         <div>
                           <label className="block text-sm font-medium text-secondary mb-2">
                             Scope Summary
-                            <Info className="w-4 h-4 inline ml-1 text-muted" />
+                            <Tooltip id="scopeSummary" content={tooltips.scopeSummary} />
                           </label>
                           <textarea
                             value={formData.scope}
@@ -430,7 +486,7 @@ export default function CaseStudies() {
                         <div>
                           <label className="block text-sm font-medium text-secondary mb-2">
                             Final project outcome
-                            <Info className="w-4 h-4 inline ml-1 text-muted" />
+                            <Tooltip id="finalOutcome" content={tooltips.finalOutcome} />
                           </label>
                           <textarea
                             value={formData.outcome}
@@ -475,7 +531,7 @@ export default function CaseStudies() {
                         <div>
                           <label className="block text-sm font-medium text-secondary mb-2">
                             Upload Files (Optional)
-                            <Info className="w-4 h-4 inline ml-1 text-muted" />
+                            <Tooltip id="uploadFiles" content={tooltips.uploadFiles} />
                           </label>
                           <div className="border-2 border-dashed border-light rounded-lg p-6 text-center">
                             <input

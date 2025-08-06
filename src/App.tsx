@@ -47,6 +47,7 @@ export default function App() {
         <Route path="/feedback" element={<Feedback />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/case-study-library" element={<CaseStudies />} />
         
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/signin" replace />} />

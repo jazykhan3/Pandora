@@ -154,10 +154,10 @@ export default function Home() {
                       : 'hover:border-accent hover:shadow-sm'
                   }`}
                 >
-                  <div className="relative">
+                  <div className="relative flex items-center">
                     <tool.icon className="w-5 h-5 text-accent flex-shrink-0" />
                     {tool.comingSoon && (
-                      <div className="absolute -top-2 -right-2 bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full border border-green-200 whitespace-nowrap">
+                      <div className="ml-2 bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full border border-green-200 whitespace-nowrap">
                         Coming Soon
                       </div>
                     )}
