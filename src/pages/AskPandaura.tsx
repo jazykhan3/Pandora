@@ -172,7 +172,7 @@ export default function AskPandaura({ sessionMode = false }: AskPandauraProps) {
       </div>
 
       {/* Fixed Bottom Input */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white border-t px-6 py-4 shadow-md z-30">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t px-6 py-4 shadow-md z-30">
         <div className="flex items-end gap-3 max-w-4xl mx-auto">
           <textarea
             value={chatMessage}
