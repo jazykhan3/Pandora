@@ -14,11 +14,13 @@ import Feedback from "./pages/Feedback";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import CaseStudies from "./pages/CaseStudies";
+import { ModuleStateProvider } from "./contexts/ModuleStateContext";
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
+    <ModuleStateProvider>
+      <Router>
+        <Routes>
         {/* Authentication & Home */}
         <Route path="/" element={<Navigate to="/signin" replace />} />
         <Route path="/signin" element={<SignIn />} />
@@ -48,7 +50,8 @@ export default function App() {
         
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/signin" replace />} />
-      </Routes>
-    </Router>
+        </Routes>
+      </Router>
+    </ModuleStateProvider>
   );
 }

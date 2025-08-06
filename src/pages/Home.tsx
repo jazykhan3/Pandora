@@ -10,7 +10,7 @@ import {
   Clock,
   FolderOpen
 } from "lucide-react";
-import logo from "../assets/logop.png";
+import logo from "../assets/logo.png";
 import NavbarIcons from "./NavbarIcons";
 import { Card, Button } from "../components/ui";
 
@@ -20,30 +20,35 @@ const quickTools = [
     icon: Cpu,
     path: "/tool/logic",
     description: "Turn natural language into vendor-ready PLC code instantly.",
+    comingSoon: false,
   },
   {
     name: "Tag Database Manager", 
     icon: Database,
     path: "/tool/tags",
     description: "Organize and maintain all your PLC tags in one place.",
+    comingSoon: false,
   },
   {
     name: "AutoDocs",
     icon: FileText,
     path: "/tool/autodocs", 
     description: "Auto-generate professional PLC documentation.",
+    comingSoon: false,
   },
   {
     name: "SignalFlow",
     icon: Zap,
     path: "/tool/signalflow",
     description: "Visualize and trace signal paths through your automation system.",
+    comingSoon: true,
   },
   {
     name: "Pandaura AS Assistant",
     icon: MessageCircle,
     path: "/tool/assistant",
     description: "Get instant help with automation documents, logic files, and real-time support.",
+    comingSoon: false,
   },
 ];
 
@@ -62,11 +67,12 @@ export default function Home() {
       {/* Header */}
       <header className="flex items-center justify-between bg-surface px-6 py-4 border-b border-light shadow">
         <div className="flex items-center gap-3">
-          <img src={logo} alt="Pandaura Logo" className="h-12 w-auto" />
-          <div>
-            <h1 className="text-xl font-bold text-primary">Pandaura AS</h1>
-            <p className="text-sm text-secondary">Industrial Automation Suite</p>
-          </div>
+          <img 
+            src={logo} 
+            alt="Pandaura Logo" 
+            className="h-16 w-auto filter-none" 
+            style={{ filter: 'none', imageRendering: 'crisp-edges' }}
+          />
         </div>
         <div className="flex items-center space-x-4">
           <NavbarIcons />
@@ -140,15 +146,27 @@ export default function Home() {
               {quickTools.map((tool) => (
                 <button
                   key={tool.name}
-                  onClick={() => navigate(tool.path)}
-                  className="flex items-center gap-3 p-4 bg-background rounded-md border border-light hover:border-accent hover:shadow-sm transition-all text-left"
+                  onClick={() => !tool.comingSoon && navigate(tool.path)}
+                  disabled={tool.comingSoon}
+                  className={`flex items-center gap-3 p-4 bg-background rounded-md border border-light transition-all text-left relative ${
+                    tool.comingSoon 
+                      ? 'opacity-75 cursor-not-allowed' 
+                      : 'hover:border-accent hover:shadow-sm'
+                  }`}
                 >
-                  <tool.icon className="w-5 h-5 text-accent flex-shrink-0" />
+                  <div className="relative">
+                    <tool.icon className="w-5 h-5 text-accent flex-shrink-0" />
+                    {tool.comingSoon && (
+                      <div className="absolute -top-2 -right-2 bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full border border-green-200 whitespace-nowrap">
+                        Coming Soon
+                      </div>
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="text-sm font-medium text-primary">{tool.name}</h4>
                     <p className="text-xs text-muted truncate">{tool.description}</p>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-muted flex-shrink-0" />
+                  {!tool.comingSoon && <ArrowRight className="w-4 h-4 text-muted flex-shrink-0" />}
                 </button>
               ))}
             </div>

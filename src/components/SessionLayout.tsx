@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Home, AlertTriangle } from "lucide-react";
-import logo from "../assets/logop.png";
+import logo from "../assets/logo.png";
 
 interface SessionLayoutProps {
   children: React.ReactNode;
@@ -23,9 +23,13 @@ export default function SessionLayout({ children }: SessionLayoutProps) {
             <ArrowLeft className="w-5 h-5 text-secondary" />
           </button>
           <div className="flex items-center gap-3">
-            <img src={logo} alt="Pandaura Logo" className="h-10 w-auto" />
+            <img 
+              src={logo} 
+              alt="Pandaura Logo" 
+              className="h-12 w-auto filter-none" 
+              style={{ filter: 'none', imageRendering: 'crisp-edges' }}
+            />
             <div>
-              <h1 className="text-lg font-semibold text-primary">Pandaura AS</h1>
               <div className="flex items-center gap-2">
                 <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">
                   Quick Session
@@ -70,7 +74,7 @@ export default function SessionLayout({ children }: SessionLayoutProps) {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
         {children}
       </div>
     </div>

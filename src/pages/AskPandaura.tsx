@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   UploadCloud,
   MessageSquare,
@@ -7,14 +7,32 @@ import {
   Send,
 } from "lucide-react";
 import pandauraLogo from "../assets/logo.png";
+import { useModuleState } from "../contexts/ModuleStateContext";
 
 interface AskPandauraProps {
   sessionMode?: boolean;
 }
 
 export default function AskPandaura({ sessionMode = false }: AskPandauraProps) {
-  const [chatMessage, setChatMessage] = useState("");
+  const { getModuleState, saveModuleState } = useModuleState();
+  
+  // Get persisted state or use defaults
+  const moduleState = getModuleState('AskPandaura');
+  const [chatMessage, setChatMessage] = useState(moduleState.chatMessage || "");
   const [showConversationsModal, setShowConversationsModal] = useState(false);
+
+  // Auto-save state changes (only in non-session mode)
+  useEffect(() => {
+    if (!sessionMode) {
+      const timeoutId = setTimeout(() => {
+        saveModuleState('AskPandaura', {
+          chatMessage
+        });
+      }, 1000); // Auto-save after 1 second of inactivity
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [chatMessage, sessionMode, saveModuleState]);
 
   const renderConversationsModal = () => (
     showConversationsModal && (
@@ -101,7 +119,12 @@ export default function AskPandaura({ sessionMode = false }: AskPandauraProps) {
         </div>
 
         <div className="text-muted mt-4 px-6 flex flex-col items-center text-center">
-          <img src={pandauraLogo} alt="Pandaura Logo" className="h-20 w-auto mb-4" />
+          <img 
+            src={pandauraLogo} 
+            alt="Pandaura Logo" 
+            className="h-24 w-auto mb-4 filter-none" 
+            style={{ filter: 'none', imageRendering: 'crisp-edges' }}
+          />
           <h2 className="text-lg font-semibold text-primary">Ask Pandaura Anything</h2>
           <p className="text-sm">
             Start a conversation with Pandaura or upload a document to begin.
@@ -149,8 +172,8 @@ export default function AskPandaura({ sessionMode = false }: AskPandauraProps) {
       </div>
 
       {/* Fixed Bottom Input */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t px-6 py-4 shadow-md z-30">
-        <div className="flex items-end gap-3 max-w-6xl mx-auto">
+      <div className="absolute bottom-0 left-0 right-0 bg-white border-t px-6 py-4 shadow-md z-30">
+        <div className="flex items-end gap-3 max-w-4xl mx-auto">
           <textarea
             value={chatMessage}
             onChange={(e) => setChatMessage(e.target.value)}

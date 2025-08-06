@@ -7,11 +7,12 @@ import {
   FileText,
   Database,
   Download,
-  BookOpen,
+  X,
 } from "lucide-react";
-import logo from "../assets/logop.png";
+import logo from "../assets/logo.png";
 import NavbarIcons from "../pages/NavbarIcons";
 import PandauraOrb from "../components/PandauraOrb";
+import { useModuleState } from "../contexts/ModuleStateContext";
 
 const tools = [
   { name: "Pandaura AS", path: "/pandaura-as", icon: MessageCircle },
@@ -19,7 +20,6 @@ const tools = [
   { name: "AutoDocs", path: "/autodocs", icon: FileText },
   { name: "Tag Database Manager", path: "/tag-database", icon: Database },
   { name: "Projects", path: "/projects", icon: Download },
-  { name: "Case Study Generator", path: "/case-studies", icon: BookOpen },
 ] as const;
 
 const toolDescriptions = {
@@ -38,9 +38,6 @@ const toolDescriptions = {
   "Projects": [
     "Manage and organize your automation projects, files, and collaborative workspaces.",
   ],
-  "Case Study Generator": [
-    "Create professional case studies from your automation projects and share success stories.",
-  ],
 };
 
 interface SharedLayoutProps {
@@ -49,8 +46,10 @@ interface SharedLayoutProps {
 
 export default function SharedLayout({ children }: SharedLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showSaveModal, setShowSaveModal] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { saveModuleState } = useModuleState();
 
   const getCurrentTool = () => {
     const currentPath = location.pathname;
@@ -62,10 +61,43 @@ export default function SharedLayout({ children }: SharedLayoutProps) {
     navigate(toolPath);
   };
 
+  const handleLogoClick = () => {
+    setShowSaveModal(true);
+  };
+
+  const handleSaveAndGoHome = () => {
+    // Trigger final save for current module
+    const currentTool = getCurrentTool();
+    console.log(`Auto-saving ${currentTool} progress...`);
+    
+    // Additional save logic can be added here if needed
+    // The individual modules are already auto-saving via their useEffect hooks
+    
+    setShowSaveModal(false);
+    navigate('/home');
+  };
+
+  const handleGoHomeWithoutSaving = () => {
+    setShowSaveModal(false);
+    navigate('/home');
+  };
+
   const renderHeader = () => (
     <header className="flex items-center justify-between bg-surface px-6 py-4 border-b border-light shadow">
       <div className="flex items-center gap-3">
-        <img src={logo} alt="Pandaura Logo" className="h-12 w-auto" />
+        <button 
+          onClick={handleLogoClick} 
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          title="Go to Home"
+        >
+          <img 
+            src={logo} 
+            alt="Pandaura Logo" 
+            className="h-16 w-auto filter-none" 
+            style={{ filter: 'none', imageRendering: 'crisp-edges' }}
+          />
+          <span className="text-lg font-bold text-primary">Pandaura</span>
+        </button>
       </div>
       <div className="flex items-center space-x-4">
         <NavbarIcons />
@@ -119,6 +151,41 @@ export default function SharedLayout({ children }: SharedLayoutProps) {
     </div>
   );
 
+  const renderSaveModal = () => (
+    showSaveModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg w-96 p-6 shadow-xl">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-primary">Save Current Progress?</h3>
+            <button
+              onClick={() => setShowSaveModal(false)}
+              className="text-secondary hover:text-primary"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <p className="text-sm text-secondary mb-6">
+            Do you want to save your current progress before returning to the Home screen?
+          </p>
+          <div className="flex gap-3 justify-end">
+            <button
+              onClick={handleGoHomeWithoutSaving}
+              className="px-4 py-2 border border-light rounded-md text-sm hover:bg-gray-100 transition-colors"
+            >
+              Don't Save
+            </button>
+            <button
+              onClick={handleSaveAndGoHome}
+              className="px-4 py-2 bg-primary text-white rounded-md text-sm hover:bg-secondary transition-colors"
+            >
+              Save & Go Home
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  );
+
   return (
     <div className="flex flex-col h-screen bg-background text-primary">
       {renderHeader()}
@@ -127,6 +194,7 @@ export default function SharedLayout({ children }: SharedLayoutProps) {
         <div className="flex-1 overflow-y-auto">{children}</div>
       </div>
       <PandauraOrb />
+      {renderSaveModal()}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import RoutineSearchbar from "../pages/STEditor/RoutineSearchbar";
 import AutoFixTooltip from "../pages/STEditor/AutoFixTooltip";
 import RefactorSuggestionBanner from "../pages/STEditor/RefactorSuggestionBanner";
 import SmartEditToolbar from "../pages/STEditor/SmartEditToolbar";
+import { useModuleState } from "../contexts/ModuleStateContext";
 
 import {
   UploadCloud,
@@ -20,8 +21,12 @@ interface LogicStudioProps {
 }
 
 export default function LogicStudio({ sessionMode = false }: LogicStudioProps) {
-  const [prompt, setPrompt] = useState("");
-  const [editorCode, setEditorCode] = useState(`PROGRAM Main
+  const { getModuleState, saveModuleState } = useModuleState();
+  
+  // Get persisted state or use defaults
+  const moduleState = getModuleState('LogicStudio');
+  const [prompt, setPrompt] = useState(moduleState.prompt || "");
+  const [editorCode, setEditorCode] = useState(moduleState.editorCode || `PROGRAM Main
   VAR
     Start_Button    : BOOL;
     Stop_Button     : BOOL;
@@ -45,11 +50,11 @@ export default function LogicStudio({ sessionMode = false }: LogicStudioProps) {
 
 END_PROGRAM`);
   
-  const [vendor, setVendor] = useState("Rockwell" as "Rockwell" | "Siemens" | "Beckhoff");
+  const [vendor, setVendor] = useState((moduleState.vendor as "Rockwell" | "Siemens" | "Beckhoff") || "Rockwell");
   const [showVendorDropdown, setShowVendorDropdown] = useState(false);
-  const [showPendingChanges, setShowPendingChanges] = useState(false);
-  const [showAISuggestions, setShowAISuggestions] = useState(true);
-  const [vendorContextEnabled, setVendorContextEnabled] = useState(false);
+  const [showPendingChanges, setShowPendingChanges] = useState(moduleState.showPendingChanges || false);
+  const [showAISuggestions, setShowAISuggestions] = useState(moduleState.showAISuggestions !== undefined ? moduleState.showAISuggestions : true);
+  const [vendorContextEnabled, setVendorContextEnabled] = useState(moduleState.vendorContextEnabled || false);
   
   const vendorDropdownRef = useRef<HTMLDivElement>(null);
   const vendorContextRef = useRef<HTMLDivElement>(null);
@@ -69,6 +74,24 @@ END_PROGRAM`);
       type: 'added' as const
     }
   ];
+
+  // Auto-save state changes (only in non-session mode)
+  useEffect(() => {
+    if (!sessionMode) {
+      const timeoutId = setTimeout(() => {
+        saveModuleState('LogicStudio', {
+          prompt,
+          editorCode,
+          vendor,
+          showPendingChanges,
+          showAISuggestions,
+          vendorContextEnabled
+        });
+      }, 1000); // Auto-save after 1 second of inactivity
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [prompt, editorCode, vendor, showPendingChanges, showAISuggestions, vendorContextEnabled, sessionMode, saveModuleState]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {

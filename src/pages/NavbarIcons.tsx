@@ -119,20 +119,11 @@ export default function NavbarIcons() {
               >
                 👤 Profile
               </li>
+
               <li 
                 onClick={() => {
-                  console.log("Opening settings...");
-                  alert("Application settings would open here");
-                  setActiveDropdown(null);
-                }}
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-              >
-                ⚙️ Settings
-              </li>
-              <li 
-                onClick={() => {
-                  console.log("Opening feedback...");
-                  alert("Feedback form would open here");
+                  console.log("Navigating to feedback...");
+                  navigate('/feedback');
                   setActiveDropdown(null);
                 }}
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -141,8 +132,8 @@ export default function NavbarIcons() {
               </li>
               <li 
                 onClick={() => {
-                  console.log("Opening privacy settings...");
-                  alert("Privacy settings would open here");
+                  console.log("Navigating to privacy...");
+                  navigate('/privacy');
                   setActiveDropdown(null);
                 }}
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -151,8 +142,8 @@ export default function NavbarIcons() {
               </li>
               <li 
                 onClick={() => {
-                  console.log("Opening case studies...");
-                  alert("Case studies library would open here");
+                  console.log("Navigating to case studies...");
+                  navigate('/case-studies');
                   setActiveDropdown(null);
                 }}
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"

@@ -8,7 +8,8 @@ export default function SplashScreen() {
         <img
           src={pandauraLogo}
           alt="Pandaura Logo"
-          className="h-40 w-auto animate-pulse"
+          className="h-48 w-auto animate-pulse filter-none"
+          style={{ filter: 'none', imageRendering: 'crisp-edges' }}
         />
         <p className="text-primary text-lg font-semibold animate-pulse">Loading Pandaura...</p>
       </div>

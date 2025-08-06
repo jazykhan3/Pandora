@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import SplashScreen from "../pages/SplashScreen";
 import { authenticateUser } from "../utils/mockAuth";
 import { Eye, EyeOff } from "lucide-react"; 
-import logo from "../assets/logop.png";
+import logo from "../assets/logo.png";
 
 // Industrial automation tooltips for inspiration
 const inspirationalTooltips = [
@@ -83,7 +83,8 @@ export default function SignInPage() {
         <img
           src={logo}
           alt="Pandaura AS Logo"
-          className="h-20 w-auto"
+          className="h-24 w-auto filter-none"
+          style={{ filter: 'none', imageRendering: 'crisp-edges' }}
         />
         <h1 className="text-3xl font-bold text-primary text-center mt-4">
           Pandaura AS
