@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Plug, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function NavbarIcons() {
   const [activeDropdown, setActiveDropdown] = useState<"integrations" | "profile" | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const containerRef = useRef<HTMLDivElement>(null);
 
   const toggleDropdown = (type: typeof activeDropdown) => {
@@ -112,7 +113,7 @@ export default function NavbarIcons() {
               <li 
                 onClick={() => {
                   console.log("Navigating to profile...");
-                  navigate('/profile');
+                  navigate('/profile', { state: { from: location.pathname } });
                   setActiveDropdown(null);
                 }}
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"

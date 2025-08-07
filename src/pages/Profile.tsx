@@ -20,7 +20,7 @@ import {
   AlertTriangle,
   ArrowLeft
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import PandauraOrb from "../components/PandauraOrb";
 
 interface UserProfile {
@@ -50,6 +50,7 @@ interface ProfilePreferences {
 
 export default function Profile() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('overview');
   const [showPassword, setShowPassword] = useState(false);
   const [show2FASetup, setShow2FASetup] = useState(false);
@@ -93,6 +94,24 @@ export default function Profile() {
   const handleSave = (section: string) => {
     console.log(`Saving ${section} changes`);
     alert(`${section} settings saved successfully!`);
+  };
+
+  const handleBackNavigation = () => {
+    // Check if there's a previous route from location state
+    const previousPath = location.state?.from;
+    
+    if (previousPath) {
+      navigate(previousPath);
+    } else {
+      // Try to go back in history
+      const canGoBack = window.history.length > 1;
+      if (canGoBack) {
+        navigate(-1);
+      } else {
+        // Fallback to home if no history available
+        navigate('/home');
+      }
+    }
   };
 
   const renderOverview = () => (
@@ -512,12 +531,12 @@ export default function Profile() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate('/ask-pandaura')}
+              onClick={handleBackNavigation}
               className="p-2 hover:bg-gray-100 rounded-md transition-colors flex items-center gap-2 text-muted hover:text-primary"
-              title="Back to Pandaura AS"
+              title="Go back"
             >
               <ArrowLeft className="w-5 h-5" />
-              <span className="text-sm">Back to App</span>
+              <span className="text-sm">Back</span>
             </button>
             
             <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-bold text-lg">
