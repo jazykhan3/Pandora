@@ -159,41 +159,76 @@ export default function AskPandaura({ sessionMode = false }: AskPandauraProps) {
           </p>
         </div>
 
-        <div className="space-y-4 mt-8 scrollable-container optimized-text">
-          <div className="bg-gray-100 rounded-md px-4 py-3 text-sm text-left">
-            <span className="font-medium text-primary">You:</span> I need to create a motor starter logic with safety interlocks for a conveyor system. Can you help me generate the structured text code for Rockwell PLC?
+        <div className="space-y-6 mt-8 scrollable-container optimized-text">
+          <div className="px-4 py-3 text-sm">
+            <div className="flex items-start gap-3 mb-2">
+              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-xs font-medium text-gray-700">
+                You
+              </div>
+              <div className="flex-1">
+                <p className="text-gray-800">I need to create a motor starter logic with safety interlocks for a conveyor system. Can you help me generate the structured text code for Rockwell PLC?</p>
+              </div>
+            </div>
           </div>
-          <div className="bg-white border border-light rounded-md px-4 py-3 text-sm shadow-sm">
-            <span className="font-medium text-primary">Pandaura:</span> I'll help you create a comprehensive motor starter logic with safety interlocks. Here's a structured approach:
-            <br/><br/>
-            <strong>Key Components:</strong>
-            <br/>• Emergency stop circuit with latching
-            <br/>• Guard door safety switches
-            <br/>• Motor overload protection
-            <br/>• Start/stop pushbutton logic
-            <br/>• Status indicators and fault diagnostics
-            <br/><br/>
-            Would you like me to generate the complete ST code with these safety features included?
+          
+          <div className="px-4 py-3 text-sm bg-gray-50">
+            <div className="flex items-start gap-3 mb-2">
+              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-xs font-medium text-white">
+                P
+              </div>
+              <div className="flex-1">
+                <p className="text-gray-800 mb-3">I'll help you create a comprehensive motor starter logic with safety interlocks. Here's a structured approach:</p>
+                
+                <div className="text-gray-800 mb-3">
+                  <strong>Key Components:</strong>
+                  <ul className="list-disc list-inside mt-2 space-y-1">
+                    <li>Emergency stop circuit with latching</li>
+                    <li>Guard door safety switches</li>
+                    <li>Motor overload protection</li>
+                    <li>Start/stop pushbutton logic</li>
+                    <li>Status indicators and fault diagnostics</li>
+                  </ul>
+                </div>
+                
+                <p className="text-gray-800">Would you like me to generate the complete ST code with these safety features included?</p>
+              </div>
+            </div>
           </div>
-          <div className="bg-gray-100 rounded-md px-4 py-3 text-sm text-left">
-            <span className="font-medium text-primary">You:</span> Yes, please generate the code and also create the tag database for all the I/O points.
+
+          <div className="px-4 py-3 text-sm">
+            <div className="flex items-start gap-3 mb-2">
+              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-xs font-medium text-gray-700">
+                You
+              </div>
+              <div className="flex-1">
+                <p className="text-gray-800">Yes, please generate the code and also create the tag database for all the I/O points.</p>
+              </div>
+            </div>
           </div>
-          <div className="bg-white border border-light rounded-md px-4 py-3 text-sm shadow-sm">
-            <span className="font-medium text-primary">Pandaura:</span> Perfect! I'll generate both the ST logic and create a comprehensive tag database. Let me switch you to Logic Studio to generate the code, and then we can use the Tag Database Manager to organize all I/O points with proper naming conventions and documentation.
-            <br/><br/>
-            <div className="flex gap-2 mt-3">
-              <button 
-                onClick={() => navigate('/logic-studio')}
-                className="bg-primary text-white px-3 py-1 rounded text-xs hover:bg-secondary transition-colors"
-              >
-                → Open in Logic Studio
-              </button>
-              <button 
-                onClick={() => navigate('/tag-database')}
-                className="bg-white border border-light px-3 py-1 rounded text-xs hover:bg-accent-light transition-colors"
-              >
-                📋 Generate Tag Database
-              </button>
+          
+          <div className="px-4 py-3 text-sm bg-gray-50">
+            <div className="flex items-start gap-3 mb-2">
+              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-xs font-medium text-white">
+                P
+              </div>
+              <div className="flex-1">
+                <p className="text-gray-800 mb-3">Perfect! I'll generate both the ST logic and create a comprehensive tag database. Let me switch you to Logic Studio to generate the code, and then we can use the Tag Database Manager to organize all I/O points with proper naming conventions and documentation.</p>
+                
+                <div className="flex gap-2 mt-3">
+                  <button 
+                    onClick={() => navigate('/logic-studio')}
+                    className="bg-primary text-white px-3 py-1 rounded text-xs hover:bg-secondary transition-colors"
+                  >
+                    → Open in Logic Studio
+                  </button>
+                  <button 
+                    onClick={() => navigate('/tag-database')}
+                    className="bg-white border border-light px-3 py-1 rounded text-xs hover:bg-accent-light transition-colors"
+                  >
+                    📋 Generate Tag Database
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
