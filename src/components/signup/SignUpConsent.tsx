@@ -2,22 +2,20 @@ import React, { useState, useEffect } from "react";
 import { useModuleState } from "../../contexts/ModuleStateContext";
 import logo from "../../assets/logo.png";
 
+interface SignUpConsentProps {
+  nextStep: () => void;
+  prevStep: () => void;
+  onConsentData: (data: any) => void;
+}
+
 export default function SignUpConsent({
   nextStep,
   prevStep,
-}: {
-  nextStep: () => void;
-  prevStep: () => void;
-}) {
-  const { getModuleState, setModuleState } = useModuleState();
-  const signupState = getModuleState("signup");
-  const [consent1, setConsent1] = useState(signupState.consent1 || false);
-  const [consent2, setConsent2] = useState(signupState.consent2 || false);
+  onConsentData,
+}: SignUpConsentProps) {
+  const [consent1, setConsent1] = useState(false);
+  const [consent2, setConsent2] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-
-  useEffect(() => {
-    setModuleState("signup", { ...signupState, consent1, consent2 });
-  }, [consent1, consent2, setModuleState]);
 
   const handleNext = () => {
     const newErrors: { [key: string]: string } = {};
@@ -26,7 +24,10 @@ export default function SignUpConsent({
     if (!consent2) newErrors.consent2 = "You must agree to the EULA.";
     setErrors(newErrors);
     if (Object.keys(newErrors).length === 0) {
-      setModuleState("signup", { ...signupState, consent1, consent2 });
+      onConsentData({
+        consent1,
+        consent2
+      });
       nextStep();
     }
   };

@@ -14,9 +14,13 @@ function getDeviceFingerprint() {
   return btoa(navigator.userAgent + navigator.language);
 }
 
-export default function SignUpEnvironment({ nextStep, prevStep }: { nextStep: () => void; prevStep: () => void }) {
-  const { getModuleState, setModuleState } = useModuleState();
-  const signupState = getModuleState("signup");
+interface SignUpEnvironmentProps {
+  nextStep: () => void;
+  prevStep: () => void;
+  onEnvironmentData: (data: any) => void;
+}
+
+export default function SignUpEnvironment({ nextStep, prevStep, onEnvironmentData }: SignUpEnvironmentProps) {
   const [instanceId, setInstanceId] = useState("");
   const [fingerprint, setFingerprint] = useState("");
   const [binding, setBinding] = useState(false);
@@ -25,10 +29,10 @@ export default function SignUpEnvironment({ nextStep, prevStep }: { nextStep: ()
 
   useEffect(() => {
     // Simulate fetching instanceId and fingerprint
-    setInstanceId(generateInstanceId());
-    setFingerprint(getDeviceFingerprint());
-    setModuleState("signup", { ...signupState, instanceId, fingerprint });
-    // eslint-disable-next-line
+    const newInstanceId = generateInstanceId();
+    const newFingerprint = getDeviceFingerprint();
+    setInstanceId(newInstanceId);
+    setFingerprint(newFingerprint);
   }, []);
 
   const handleBind = async () => {

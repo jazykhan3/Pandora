@@ -2,13 +2,17 @@ import React, { useState } from "react";
 import logo from "../../assets/logo.png";
 import { CheckCircle, Circle } from "lucide-react";
 
+interface SignUpSecurityProps {
+  nextStep: () => void;
+  prevStep: () => void;
+  onSecurityData: (data: any) => void;
+}
+
 export default function SignUpSecurity({
   nextStep,
   prevStep,
-}: {
-  nextStep: () => void;
-  prevStep: () => void;
-}) {
+  onSecurityData,
+}: SignUpSecurityProps) {
   const [method, setMethod] = useState<"totp" | "sms" | null>(null);
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
@@ -16,6 +20,12 @@ export default function SignUpSecurity({
   const handleNext = () => {
     if (!method) return setError("Select a method.");
     if (code.length !== 6) return setError("Enter 6-digit code.");
+    
+    onSecurityData({
+      method,
+      code
+    });
+    
     nextStep();
   };
 

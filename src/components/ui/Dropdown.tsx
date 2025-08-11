@@ -17,6 +17,7 @@ export interface DropdownProps {
   disabled?: boolean;
   error?: string;
   className?: string;
+  required?: boolean;
 }
 
 export default function Dropdown({
@@ -28,6 +29,7 @@ export default function Dropdown({
   disabled = false,
   error,
   className = '',
+  required = false,
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -61,7 +63,7 @@ export default function Dropdown({
     <div className="w-full">
       {label && (
         <label className="block text-sm font-medium text-secondary mb-2">
-          {label}
+          {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}
       
