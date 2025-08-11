@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useModuleState } from "../../contexts/ModuleStateContext";
+import { useSignUp } from "../../contexts/SignUpContext";
 import logo from "../../assets/logo.png";
 
 interface SignUpConsentProps {
@@ -13,8 +14,10 @@ export default function SignUpConsent({
   prevStep,
   onConsentData,
 }: SignUpConsentProps) {
-  const [consent1, setConsent1] = useState(false);
-  const [consent2, setConsent2] = useState(false);
+  const { signUpData } = useSignUp();
+  
+  const [consent1, setConsent1] = useState(signUpData.consentData?.termsAccepted || false);
+  const [consent2, setConsent2] = useState(signUpData.consentData?.privacyAccepted || false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleNext = () => {
@@ -25,8 +28,8 @@ export default function SignUpConsent({
     setErrors(newErrors);
     if (Object.keys(newErrors).length === 0) {
       onConsentData({
-        consent1,
-        consent2
+        termsAccepted: consent1,
+        privacyAccepted: consent2
       });
       nextStep();
     }

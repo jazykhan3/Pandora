@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button, Input, Dropdown } from "../ui";
+import { useSignUp } from "../../contexts/SignUpContext";
 
 interface SignUpOrgSetupProps {
   nextStep: () => void;
@@ -38,12 +39,26 @@ export default function SignUpOrgSetup({
   isJoining = false, 
   inviteData 
 }: SignUpOrgSetupProps) {
+  const { signUpData } = useSignUp();
+  
   const [formData, setFormData] = useState({
-    orgName: inviteData?.orgName || '',
-    industry: '',
-    size: ''
+    orgName: inviteData?.orgName || (signUpData.orgData?.orgName || ''),
+    industry: signUpData.orgData?.industry || '',
+    size: signUpData.orgData?.size || ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Update form data when signUpData changes
+  useEffect(() => {
+    if (signUpData.orgData) {
+      setFormData(prev => ({
+        ...prev,
+        orgName: inviteData?.orgName || signUpData.orgData?.orgName || prev.orgName,
+        industry: signUpData.orgData?.industry || prev.industry,
+        size: signUpData.orgData?.size || prev.size
+      }));
+    }
+  }, [signUpData.orgData, inviteData?.orgName]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));

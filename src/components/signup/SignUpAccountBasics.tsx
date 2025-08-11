@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { Button, Input } from "../ui";
+import { useAuth } from "../../contexts/AuthContext";
+import { useSignUp } from "../../contexts/SignUpContext";
+import { useToast } from "../ui/Toast";
 
 function validateEmail(email: string) {
   return /.+@.+\..+/.test(email);
@@ -33,16 +36,43 @@ export default function SignUpAccountBasics({
 }: SignUpAccountBasicsProps) {
   const [formData, setFormData] = useState({
     fullName: "",
-    email: inviteData?.email || "",
+    email: "", // Allow user to input their own email when joining
     password: "",
     confirmPassword: ""
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
+    const { createOrganization, acceptInvite } = useAuth();
+  const { signUpData, updateSignUpData } = useSignUp();
+  const { showToast } = useToast();
+
+  // Populate form data from context on component mount
+  React.useEffect(() => {
+    if (signUpData.accountData) {
+      setFormData(prev => ({
+        ...prev,
+        fullName: signUpData.accountData?.fullName || prev.fullName,
+        email: signUpData.accountData?.email || prev.email, // Don't pre-fill with invite email, let user choose
+        password: signUpData.accountData?.password || prev.password,
+        confirmPassword: signUpData.accountData?.confirmPassword || prev.confirmPassword
+      }));
+    }
+  }, [signUpData.accountData]);
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    const newFormData = { ...formData, [field]: value };
+    setFormData(newFormData);
+    
+    // Update context in real-time
+    updateSignUpData('accountData', {
+      fullName: newFormData.fullName,
+      email: newFormData.email,
+      password: newFormData.password,
+      confirmPassword: newFormData.confirmPassword
+    });
     
     // Clear errors when user starts typing
     if (errors[field]) {
@@ -55,9 +85,9 @@ export default function SignUpAccountBasics({
     }
 
     // Real-time validation for password confirmation
-    if (field === 'confirmPassword' || (field === 'password' && formData.confirmPassword)) {
-      const password = field === 'password' ? value : formData.password;
-      const confirmPassword = field === 'confirmPassword' ? value : formData.confirmPassword;
+    if (field === 'confirmPassword' || (field === 'password' && newFormData.confirmPassword)) {
+      const password = field === 'password' ? value : newFormData.password;
+      const confirmPassword = field === 'confirmPassword' ? value : newFormData.confirmPassword;
       
       if (confirmPassword && password !== confirmPassword) {
         setErrors(prev => ({ ...prev, confirmPassword: 'Passwords do not match' }));
@@ -99,10 +129,98 @@ export default function SignUpAccountBasics({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (validateForm()) {
-      onAccountData(formData);
-      nextStep();
+      setIsLoading(true);
+      try {
+        // Save account data to context with passwords
+        updateSignUpData('accountData', {
+          fullName: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword
+        });
+        
+        // Also call the prop callback for backward compatibility
+        onAccountData(formData);
+        
+        // If creating a new organization, create it now
+        if (signUpData.orgChoice === 'create' && signUpData.orgData && !isJoining) {
+          const result = await createOrganization({
+            orgName: signUpData.orgData.orgName,
+            industry: signUpData.orgData.industry,
+            size: signUpData.orgData.size,
+            fullName: formData.fullName,
+            email: formData.email,
+            password: formData.password
+          });
+
+          if (result.success) {
+            showToast({
+              variant: 'success',
+              title: 'Organization Created!',
+              message: `Welcome to ${signUpData.orgData.orgName}! Your organization has been successfully created.`,
+              duration: 5000
+            });
+            
+            // Mark organization as created in context
+            updateSignUpData('organizationCreated', true);
+            
+            // Continue to next step
+            nextStep();
+          } else {
+            showToast({
+              variant: 'error',
+              title: 'Organization Creation Failed',
+              message: result.message || 'Failed to create organization. Please try again.',
+              duration: 5000
+            });
+          }
+        // If joining an organization via invite, process the invite now
+        } else if (signUpData.orgChoice === 'join' && signUpData.inviteData && isJoining) {
+          const result = await acceptInvite({
+            code: signUpData.inviteData.code,
+            fullName: formData.fullName,
+            email: formData.email,
+            password: formData.password
+          });
+
+          if (result.success) {
+            showToast({
+              variant: 'success',
+              title: 'Welcome to the Team!',
+              message: `Successfully joined ${signUpData.inviteData.orgName}! Your account has been created.`,
+              duration: 5000
+            });
+            
+            // Mark as ready for 2FA setup
+            updateSignUpData('organizationCreated', true);
+            
+            // Continue to next step
+            nextStep();
+          } else {
+            showToast({
+              variant: 'error',
+              title: 'Join Organization Failed',
+              message: result.message || 'Failed to join organization. Please try again.',
+              duration: 5000
+            });
+          }
+        } else {
+          // For any other case, just continue to next step
+          nextStep();
+        }
+      } catch (error) {
+        console.error('Organization creation error:', error);
+        showToast({
+          variant: 'error',
+          title: 'Error',
+          message: 'An unexpected error occurred. Please try again.',
+          duration: 5000
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -129,7 +247,10 @@ export default function SignUpAccountBasics({
               <strong>Joining:</strong> {inviteData.orgName}
             </p>
             <p className="text-sm text-secondary">
-              Role: {inviteData.role} • Email: {inviteData.email}
+              Role: {inviteData.role}
+            </p>
+            <p className="text-xs text-secondary mt-2">
+              You can use any email address for your account.
             </p>
           </div>
         )}
@@ -151,7 +272,6 @@ export default function SignUpAccountBasics({
             value={formData.email}
             onChange={(e) => handleInputChange('email', e.target.value)}
             error={errors.email}
-            disabled={isJoining && !!inviteData?.email}
             required
           />
 
@@ -228,8 +348,9 @@ export default function SignUpAccountBasics({
             onClick={handleContinue}
             className="w-full"
             size="lg"
+            disabled={isLoading}
           >
-            Continue to Security Setup
+            {isLoading ? 'Creating Organization...' : 'Continue to Security Setup'}
           </Button>
         </div>
 

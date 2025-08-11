@@ -9,63 +9,87 @@ import SignUpConsent from '../components/signup/SignUpConsent';
 import SignUpEnvironment from '../components/signup/SignUpEnvironment';
 import SignUpFinish from '../components/signup/SignUpFinish';
 import { useAuth } from '../contexts/AuthContext';
-
-interface SignUpData {
-  orgChoice: 'create' | 'join' | null;
-  inviteData?: any;
-  orgData?: any;
-  accountData?: any;
-  securityData?: any;
-  consentData?: any;
-  environmentData?: any;
-}
+import { useSignUp } from '../contexts/SignUpContext';
 
 export default function SignUp() {
   const [step, setStep] = useState(0);
-  const [signUpData, setSignUpData] = useState<SignUpData>({
-    orgChoice: null
-  });
   const [isLoading, setIsLoading] = useState(false);
-  const { createOrganization, acceptInvite } = useAuth();
+  const { createOrganization, acceptInvite, login } = useAuth();
+  const { signUpData, updateSignUpData, clearSignUpData } = useSignUp();
   const navigate = useNavigate();
 
   const nextStep = () => setStep((s) => s + 1);
   const prevStep = () => setStep((s) => Math.max(s - 1, 0));
 
   const handleOrgChoice = (choice: 'create' | 'join', data?: any) => {
-    setSignUpData(prev => ({
-      ...prev,
-      orgChoice: choice,
-      inviteData: choice === 'join' ? data : undefined
-    }));
+    updateSignUpData('orgChoice', choice);
+    if (choice === 'join' && data) {
+      updateSignUpData('inviteData', data);
+    }
   };
 
   const handleOrgData = (data: any) => {
-    setSignUpData(prev => ({ ...prev, orgData: data }));
+    updateSignUpData('orgData', data);
   };
 
   const handleAccountData = (data: any) => {
-    setSignUpData(prev => ({ ...prev, accountData: data }));
+    updateSignUpData('accountData', data);
   };
 
   const handleSecurityData = (data: any) => {
-    setSignUpData(prev => ({ ...prev, securityData: data }));
+    updateSignUpData('securityData', data);
   };
 
   const handleConsentData = (data: any) => {
-    setSignUpData(prev => ({ ...prev, consentData: data }));
+    updateSignUpData('consentData', data);
   };
 
   const handleEnvironmentData = (data: any) => {
-    setSignUpData(prev => ({ ...prev, environmentData: data }));
+    updateSignUpData('environmentData', data);
   };
 
   const handleSubmitSignUp = async () => {
+    if (!signUpData.accountData) {
+      throw new Error('Account data is required');
+    }
+
     setIsLoading(true);
     
     try {
+      // At this point, user and organization should already be created
+      // We just need to do a final login to establish the session
+      if (signUpData.organizationCreated) {
+        // If 2FA was set up during signup, user will need to provide TOTP
+        // For now, try login without 2FA token first
+        const loginResult = await login(
+          signUpData.accountData.email,
+          signUpData.accountData.password
+        );
+
+        if (loginResult.success) {
+          clearSignUpData();
+          navigate('/home');
+          return;
+        } else if (loginResult.requiresTwoFactor) {
+          // If 2FA is required, for now just proceed to login page where user can enter 2FA
+          clearSignUpData();
+          navigate('/signin', { 
+            state: { 
+              message: 'Account created successfully! Please sign in with your credentials and 2FA code.' 
+            } 
+          });
+          return;
+        } else {
+          throw new Error(loginResult.message || 'Failed to authenticate');
+        }
+      }
+
+      // Fallback for any remaining creation logic
       if (signUpData.orgChoice === 'create') {
-        // Create new organization
+        if (!signUpData.orgData) {
+          throw new Error('Organization data is required');
+        }
+
         const result = await createOrganization({
           orgName: signUpData.orgData.orgName,
           industry: signUpData.orgData.industry,
@@ -76,11 +100,16 @@ export default function SignUp() {
         });
 
         if (result.success) {
+          clearSignUpData();
           navigate('/home');
         } else {
           throw new Error(result.message || 'Failed to create organization');
         }
       } else if (signUpData.orgChoice === 'join') {
+        if (!signUpData.inviteData) {
+          throw new Error('Invite data is required');
+        }
+
         // Accept invite and join organization
         const result = await acceptInvite({
           code: signUpData.inviteData.code,
@@ -90,6 +119,7 @@ export default function SignUp() {
         });
 
         if (result.success) {
+          clearSignUpData();
           navigate('/home');
         } else {
           throw new Error(result.message || 'Failed to join organization');
@@ -117,26 +147,58 @@ export default function SignUp() {
           />
         );
       case 2:
+        // Skip organization setup when joining existing organization
+        if (signUpData.orgChoice === 'join') {
+          return (
+            <SignUpAccountBasics
+              nextStep={nextStep}
+              prevStep={prevStep}
+              onAccountData={handleAccountData}
+              isJoining={true}
+              inviteData={signUpData.inviteData}
+            />
+          );
+        }
         return (
           <SignUpOrgSetup
             nextStep={nextStep}
             prevStep={prevStep}
             onOrgData={handleOrgData}
-            isJoining={signUpData.orgChoice === 'join'}
+            isJoining={false}
             inviteData={signUpData.inviteData}
           />
         );
       case 3:
+        // When joining, skip to security step since we handled account basics in step 2
+        if (signUpData.orgChoice === 'join') {
+          return (
+            <SignUpSecurity
+              nextStep={nextStep}
+              prevStep={prevStep}
+              onSecurityData={handleSecurityData}
+            />
+          );
+        }
         return (
           <SignUpAccountBasics
             nextStep={nextStep}
             prevStep={prevStep}
             onAccountData={handleAccountData}
-            isJoining={signUpData.orgChoice === 'join'}
+            isJoining={false}
             inviteData={signUpData.inviteData}
           />
         );
       case 4:
+        // When joining, this is consent step (shifted by 1)
+        if (signUpData.orgChoice === 'join') {
+          return (
+            <SignUpConsent
+              nextStep={nextStep}
+              prevStep={prevStep}
+              onConsentData={handleConsentData}
+            />
+          );
+        }
         return (
           <SignUpSecurity
             nextStep={nextStep}
@@ -145,6 +207,16 @@ export default function SignUp() {
           />
         );
       case 5:
+        // When joining, this is environment step (shifted by 1)  
+        if (signUpData.orgChoice === 'join') {
+          return (
+            <SignUpEnvironment
+              nextStep={nextStep}
+              prevStep={prevStep}
+              onEnvironmentData={handleEnvironmentData}
+            />
+          );
+        }
         return (
           <SignUpConsent
             nextStep={nextStep}
@@ -153,6 +225,15 @@ export default function SignUp() {
           />
         );
       case 6:
+        // When joining, this is finish step (shifted by 1)
+        if (signUpData.orgChoice === 'join') {
+          return (
+            <SignUpFinish
+              onComplete={handleSubmitSignUp}
+              isLoading={isLoading}
+            />
+          );
+        }
         return (
           <SignUpEnvironment
             nextStep={nextStep}
@@ -165,7 +246,6 @@ export default function SignUp() {
           <SignUpFinish
             onComplete={handleSubmitSignUp}
             isLoading={isLoading}
-            signUpData={signUpData}
           />
         );
       default:

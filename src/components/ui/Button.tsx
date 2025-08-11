@@ -5,7 +5,7 @@ export interface ButtonProps {
   children?: React.ReactNode;
   onClick?: () => void;
   type?: 'button' | 'submit' | 'reset';
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success';
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
   loading?: boolean;
@@ -21,6 +21,7 @@ const variantStyles = {
   outline: 'border border-light bg-white hover:bg-accent-light text-primary hover:border-accent',
   ghost: 'hover:bg-accent-light text-primary',
   danger: 'bg-red-600 hover:bg-red-700 text-white',
+  success: 'bg-green-600 hover:bg-green-700 text-white',
 };
 
 const sizeStyles = {

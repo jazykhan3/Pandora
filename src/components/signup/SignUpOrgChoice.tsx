@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Building2, Users, ArrowLeft } from "lucide-react";
+import { Building2, Users, ArrowLeft, Copy } from "lucide-react";
 import { Button, Input } from "../ui";
 import { useAuth } from "../../contexts/AuthContext";
+import { useSignUp } from "../../contexts/SignUpContext";
 
 interface SignUpOrgChoiceProps {
   nextStep: () => void;
@@ -10,8 +11,9 @@ interface SignUpOrgChoiceProps {
 }
 
 export default function SignUpOrgChoice({ nextStep, prevStep, onOrgChoice }: SignUpOrgChoiceProps) {
-  const [choice, setChoice] = useState<'create' | 'join' | null>(null);
-  const [inviteCode, setInviteCode] = useState('');
+  const { signUpData } = useSignUp();
+  const [choice, setChoice] = useState<'create' | 'join' | null>(signUpData.orgChoice);
+  const [inviteCode, setInviteCode] = useState(signUpData.inviteData?.code || '');
   const [isValidating, setIsValidating] = useState(false);
   const [validationError, setValidationError] = useState('');
   const { validateInvite } = useAuth();
@@ -49,6 +51,11 @@ export default function SignUpOrgChoice({ nextStep, prevStep, onOrgChoice }: Sig
     } finally {
       setIsValidating(false);
     }
+  };
+
+  const copyToClipboard = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setInviteCode(code);
   };
 
   return (
@@ -121,6 +128,55 @@ export default function SignUpOrgChoice({ nextStep, prevStep, onOrgChoice }: Sig
         {/* Invite Code Input */}
         {choice === 'join' && (
           <div className="mt-6 space-y-4">
+            {/* Test Invite Code Display */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <h4 className="text-sm font-medium text-blue-900 mb-3">For Testing - Sample Invite Codes:</h4>
+              <div className="space-y-2">
+                <div className="bg-white rounded border p-2 flex items-center justify-between">
+                  <div>
+                    <div className="font-mono text-sm text-blue-800">TESTCODE123</div>
+                    <div className="text-xs text-blue-600">Viewer role • test@example.com</div>
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard('TESTCODE123')}
+                    className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded"
+                    title="Copy and use this code"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="bg-white rounded border p-2 flex items-center justify-between">
+                  <div>
+                    <div className="font-mono text-sm text-blue-800">ADMINCODE456</div>
+                    <div className="text-xs text-blue-600">Admin role • admin@example.com</div>
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard('ADMINCODE456')}
+                    className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded"
+                    title="Copy and use this code"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="bg-white rounded border p-2 flex items-center justify-between">
+                  <div>
+                    <div className="font-mono text-sm text-blue-800">EDITORCODE789</div>
+                    <div className="text-xs text-blue-600">Editor role • editor@example.com</div>
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard('EDITORCODE789')}
+                    className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded"
+                    title="Copy and use this code"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              <p className="text-xs text-blue-700 mt-2">
+                Click the copy icon to use any of these test codes.
+              </p>
+            </div>
+
             <div>
               <Input
                 label="Invite Code"

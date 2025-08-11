@@ -16,12 +16,16 @@ import Terms from "./pages/Terms";
 import CaseStudies from "./pages/CaseStudies";
 import { ModuleStateProvider } from "./contexts/ModuleStateContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import { SignUpProvider } from "./contexts/SignUpContext";
+import { ToastProvider } from "./components/ui/Toast";
 import SignUp from "./pages/SignUp";
 
 export default function App() {
   return (
     <AuthProvider>
-      <ModuleStateProvider>
+      <SignUpProvider>
+        <ToastProvider>
+          <ModuleStateProvider>
         <Router>
         <Routes>
         {/* Authentication & Home */}
@@ -57,7 +61,9 @@ export default function App() {
         <Route path="*" element={<Navigate to="/signin" replace />} />
         </Routes>
         </Router>
-      </ModuleStateProvider>
+          </ModuleStateProvider>
+        </ToastProvider>
+      </SignUpProvider>
     </AuthProvider>
   );
 }
