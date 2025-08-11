@@ -15,6 +15,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import CaseStudies from "./pages/CaseStudies";
 import { ModuleStateProvider } from "./contexts/ModuleStateContext";
+import SignUp from "./pages/SignUp";
 
 export default function App() {
   return (
@@ -22,7 +23,8 @@ export default function App() {
       <Router>
         <Routes>
         {/* Authentication & Home */}
-        <Route path="/" element={<Navigate to="/signin" replace />} />
+        <Route path="/" element={<Navigate to="/signup" replace />} />
+        <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/home" element={<Home />} />
         
