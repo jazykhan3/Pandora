@@ -1,32 +1,57 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
+import { Button } from "../ui";
 
-export default function SignUpWelcome({ nextStep }: { nextStep: () => void }) {
+interface SignUpWelcomeProps {
+  nextStep: () => void;
+}
+
+export default function SignUpWelcome({ nextStep }: SignUpWelcomeProps) {
+  const navigate = useNavigate();
+
   return (
-    <div className="flex flex-col items-center justify-center bg-white">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="w-full h-full bg-gradient-to-br from-accent/5 to-transparent" />
-      </div>
+    <div className="w-full max-w-md mx-auto">
+      <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="flex flex-col items-center">
+          <img
+            src={logo}
+            alt="Pandaura AS Logo"
+            className="h-20 w-auto filter-none mb-6"
+            style={{ filter: "none", imageRendering: "crisp-edges" }}
+          />
+          
+          <h1 className="text-2xl font-bold text-primary text-center mb-2">
+            Welcome to Pandaura AS
+          </h1>
+          
+          <p className="text-secondary text-center mb-8">
+            Your complete industrial automation platform for PLCs, SCADA, and robotics
+          </p>
 
-      <div className="z-10 mb-8 flex flex-col items-center">
-        <img
-          src={logo}
-          alt="Pandaura AS Logo"
-          className="h-24 w-auto filter-none"
-          style={{ filter: "none", imageRendering: "crisp-edges" }}
-        />
-        <h1 className="text-3xl font-bold text-primary text-center mt-4">
-          Welcome to Pandaura AS
-        </h1>
-        <h2 className="text-lg text-secondary text-center mb-8">
-          Industrial Automation Suite
-        </h2>
+          <div className="w-full space-y-4">
+            <Button
+              onClick={nextStep}
+              className="w-full"
+              size="lg"
+            >
+              Create Organization / Join Team
+            </Button>
+            
+            <Button
+              onClick={() => navigate('/signin')}
+              variant="outline"
+              className="w-full"
+              size="lg"
+            >
+              Sign In
+            </Button>
+          </div>
 
-        <button
-          className="w-full bg-primary hover:bg-secondary text-white py-3 rounded-md shadow-sm transition-all duration-200 focus:ring-2 focus:ring-accent focus:ring-offset-2 font-medium"
-          onClick={nextStep}
-        >
-          Create Your Account
-        </button>
+          <div className="mt-8 text-center text-sm text-muted">
+            <p>Secure • On-Premise • Zero Trust</p>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -15,12 +15,14 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import CaseStudies from "./pages/CaseStudies";
 import { ModuleStateProvider } from "./contexts/ModuleStateContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import SignUp from "./pages/SignUp";
 
 export default function App() {
   return (
-    <ModuleStateProvider>
-      <Router>
+    <AuthProvider>
+      <ModuleStateProvider>
+        <Router>
         <Routes>
         {/* Authentication & Home */}
         <Route path="/" element={<Navigate to="/signup" replace />} />
@@ -54,7 +56,8 @@ export default function App() {
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/signin" replace />} />
         </Routes>
-      </Router>
-    </ModuleStateProvider>
+        </Router>
+      </ModuleStateProvider>
+    </AuthProvider>
   );
 }

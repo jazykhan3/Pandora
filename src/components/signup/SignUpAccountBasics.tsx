@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { useModuleState } from "../../contexts/ModuleStateContext";
-import { Eye, EyeOff } from "lucide-react";
-import logo from "../../assets/logo.png";
+import React, { useState } from "react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Button, Input } from "../ui";
 
 function validateEmail(email: string) {
   return /.+@.+\..+/.test(email);
@@ -9,7 +8,7 @@ function validateEmail(email: string) {
 
 function passwordRequirements(password: string) {
   return {
-    length: password.length >= 8,
+    length: password.length >= 12,
     uppercase: /[A-Z]/.test(password),
     lowercase: /[a-z]/.test(password),
     number: /[0-9]/.test(password),
@@ -17,276 +16,226 @@ function passwordRequirements(password: string) {
   };
 }
 
-export default function SignUpAccountBasics({ nextStep, prevStep }: { nextStep: () => void; prevStep: () => void; }) {
-  const { getModuleState, setModuleState } = useModuleState();
-  const signupState = getModuleState("signup");
-  const [fullName, setFullName] = useState(signupState.fullName || "");
-  const [email, setEmail] = useState(signupState.email || "");
-  const [password, setPassword] = useState(signupState.password || "");
-  const [confirm, setConfirm] = useState(signupState.confirm || "");
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+interface SignUpAccountBasicsProps {
+  nextStep: () => void;
+  prevStep: () => void;
+  onAccountData: (data: any) => void;
+  isJoining?: boolean;
+  inviteData?: any;
+}
+
+export default function SignUpAccountBasics({ 
+  nextStep, 
+  prevStep, 
+  onAccountData, 
+  isJoining = false, 
+  inviteData 
+}: SignUpAccountBasicsProps) {
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: inviteData?.email || "",
+    password: "",
+    confirmPassword: ""
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [confirmError, setConfirmError] = useState("");
 
-  // Persist to context on change
-  useEffect(() => {
-    setModuleState("signup", { fullName, email, password, confirm });
-  }, [fullName, email, password, confirm, setModuleState]);
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Clear errors when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setEmail(value);
-    setErrors((prev) => ({
-      ...prev,
-      email:
-        value.length === 0
-          ? ""
-          : validateEmail(value)
-          ? ""
-          : "Valid email required.",
-    }));
-  };
+    // Real-time validation for email
+    if (field === 'email' && value && !validateEmail(value)) {
+      setErrors(prev => ({ ...prev, email: 'Please enter a valid email address' }));
+    }
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPassword(value);
-    const reqs = passwordRequirements(value);
-    const allValid = Object.values(reqs).every(Boolean);
-    setErrors((prev) => ({
-      ...prev,
-      password:
-        value.length === 0
-          ? ""
-          : allValid
-          ? ""
-          : "Password does not meet requirements.",
-    }));
-    if (confirm.length > 0) {
-      setConfirmError(value === confirm ? "" : "Passwords do not match.");
+    // Real-time validation for password confirmation
+    if (field === 'confirmPassword' || (field === 'password' && formData.confirmPassword)) {
+      const password = field === 'password' ? value : formData.password;
+      const confirmPassword = field === 'confirmPassword' ? value : formData.confirmPassword;
+      
+      if (confirmPassword && password !== confirmPassword) {
+        setErrors(prev => ({ ...prev, confirmPassword: 'Passwords do not match' }));
+      } else {
+        setErrors(prev => ({ ...prev, confirmPassword: '' }));
+      }
     }
   };
 
-  const handleConfirmChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setConfirm(value);
-    setConfirmError(password === value ? "" : "Passwords do not match.");
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = 'Full name is required';
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else {
+      const reqs = passwordRequirements(formData.password);
+      if (!Object.values(reqs).every(Boolean)) {
+        newErrors.password = 'Password does not meet all requirements';
+      }
+    }
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = () => {
-    const reqs = passwordRequirements(password);
-    const allValid = Object.values(reqs).every(Boolean);
-    const newErrors: { [key: string]: string } = {};
-    if (!fullName) newErrors.fullName = "Full name required.";
-    if (!validateEmail(email)) newErrors.email = "Valid email required.";
-    if (!allValid) newErrors.password = "Password does not meet requirements.";
-    if (password !== confirm) newErrors.confirm = "Passwords do not match.";
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length === 0) {
-      setModuleState("signup", { fullName, email, password, confirm });
+  const handleContinue = () => {
+    if (validateForm()) {
+      onAccountData(formData);
       nextStep();
     }
   };
 
+  const passwordReqs = passwordRequirements(formData.password);
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-fit bg-background relative overflow-hidden py-0 px-4">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="w-full h-full bg-gradient-to-br from-accent/5 to-transparent" />
-      </div>
+    <div className="w-full max-w-md mx-auto">
+      <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="flex items-center mb-6">
+          <button
+            onClick={prevStep}
+            className="mr-3 p-1 rounded-md hover:bg-gray-100 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 text-secondary" />
+          </button>
+          <h2 className="text-xl font-semibold text-primary">
+            Account Setup
+          </h2>
+        </div>
 
-      <div className="z-10 mb-8 flex flex-col items-center">
-        <img
-          src={logo}
-          alt="Pandaura AS Logo"
-          className="h-24 w-auto filter-none"
-          style={{ filter: "none", imageRendering: "crisp-edges" }}
-        />
-      </div>
-
-      <div className="w-[600px] max-w-lg bg-surface border border-light rounded-lg shadow-card z-10 p-8">
-        <h3 className="text-xl font-semibold text-primary text-center mb-6">
-          Account Basics
-        </h3>
-        <form
-          className="space-y-6"
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleNext();
-          }}
-          autoComplete="on"
-        >
-          <div className="relative">
-            <input
-              id="fullName"
-              name="fullName"
-              type="text"
-              required
-              autoFocus
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="peer w-full px-4 pt-6 pb-3 bg-surface text-primary border border-light rounded-md shadow-sm outline-none focus:ring-2 focus:ring-accent focus:border-accent placeholder-transparent transition-all"
-              placeholder=" "
-            />
-            <label
-              htmlFor="fullName"
-              className="absolute left-4 top-2 text-sm text-muted transition-all peer-focus:text-xs peer-focus:text-secondary peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-placeholder-shown:text-disabled"
-            >
-              Full Name
-            </label>
-            {errors.fullName && (
-              <p className="text-error text-sm mt-2">{errors.fullName}</p>
-            )}
+        {isJoining && inviteData && (
+          <div className="mb-6 p-4 bg-accent-light rounded-lg">
+            <p className="text-sm text-primary">
+              <strong>Joining:</strong> {inviteData.orgName}
+            </p>
+            <p className="text-sm text-secondary">
+              Role: {inviteData.role} • Email: {inviteData.email}
+            </p>
           </div>
+        )}
+
+        <div className="space-y-4">
+          <Input
+            label="Full Name"
+            placeholder="Enter your full name"
+            value={formData.fullName}
+            onChange={(e) => handleInputChange('fullName', e.target.value)}
+            error={errors.fullName}
+            required
+          />
+
+          <Input
+            label="Work Email"
+            type="email"
+            placeholder="Enter your work email"
+            value={formData.email}
+            onChange={(e) => handleInputChange('email', e.target.value)}
+            error={errors.email}
+            disabled={isJoining && !!inviteData?.email}
+            required
+          />
 
           <div className="relative">
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              value={email}
-              onChange={handleEmailChange}
-              className="peer w-full px-4 pt-6 pb-3 bg-surface text-primary border border-light rounded-md shadow-sm outline-none focus:ring-2 focus:ring-accent focus:border-accent placeholder-transparent transition-all"
-              placeholder=" "
-            />
-            <label
-              htmlFor="email"
-              className="absolute left-4 top-2 text-sm text-muted transition-all peer-focus:text-xs peer-focus:text-secondary peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-placeholder-shown:text-disabled"
-            >
-              Work Email
-            </label>
-            {errors.email && (
-              <p className="text-error text-sm mt-2">{errors.email}</p>
-            )}
-          </div>
-
-          <div className="relative">
-            <input
-              id="password"
-              name="password"
+            <Input
+              label="Create Password"
               type={showPassword ? "text" : "password"}
+              placeholder="Create a strong password"
+              value={formData.password}
+              onChange={(e) => handleInputChange('password', e.target.value)}
+              error={errors.password}
               required
-              value={password}
-              onChange={handlePasswordChange}
-              className="peer w-full px-4 pt-6 pb-3 bg-surface text-primary border border-light rounded-md shadow-sm outline-none focus:ring-2 focus:ring-accent focus:border-accent placeholder-transparent transition-all pr-10"
-              placeholder=" "
             />
-            <label
-              htmlFor="password"
-              className="absolute left-4 top-2 text-sm text-muted transition-all 
-                             peer-focus:text-xs peer-focus:text-secondary peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-placeholder-shown:text-disabled"
-            >
-              Create Password
-            </label>
             <button
               type="button"
-              onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted hover:text-primary transition-colors"
-              tabIndex={-1}
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-8 text-secondary hover:text-primary transition-colors"
             >
-              {showPassword ? (
-                <EyeOff className="w-5 h-5" />
-              ) : (
-                <Eye className="w-5 h-5" />
-              )}
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
 
-          <div className="text-xs mt-2">
-            <ul className="space-y-1">
-              <li
-                className={password.length >= 8 ? "text-success" : "text-muted"}
-              >
-                {password.length >= 8 ? "✓" : "✗"} Minimum 8 characters
-              </li>
-              <li
-                className={
-                  /[A-Z]/.test(password) ? "text-success" : "text-muted"
-                }
-              >
-                {/[A-Z]/.test(password) ? "✓" : "✗"} Uppercase letter
-              </li>
-              <li
-                className={
-                  /[a-z]/.test(password) ? "text-success" : "text-muted"
-                }
-              >
-                {/[a-z]/.test(password) ? "✓" : "✗"} Lowercase letter
-              </li>
-              <li
-                className={
-                  /[0-9]/.test(password) ? "text-success" : "text-muted"
-                }
-              >
-                {/[0-9]/.test(password) ? "✓" : "✗"} Number
-              </li>
-              <li
-                className={
-                  /[^A-Za-z0-9]/.test(password) ? "text-success" : "text-muted"
-                }
-              >
-                {/[^A-Za-z0-9]/.test(password) ? "✓" : "✗"} Special character
-              </li>
-            </ul>
-          </div>
-          {errors.password && (
-            <p className="text-error text-sm mt-2">{errors.password}</p>
+          {/* Password Requirements */}
+          {formData.password && (
+            <div className="text-xs space-y-1 p-3 bg-gray-50 rounded-md">
+              <p className="font-medium text-secondary mb-2">Password Requirements:</p>
+              <div className="grid grid-cols-1 gap-1">
+                <div className={`flex items-center ${passwordReqs.length ? 'text-green-600' : 'text-gray-400'}`}>
+                  <span className="mr-2">{passwordReqs.length ? '✓' : '○'}</span>
+                  At least 12 characters
+                </div>
+                <div className={`flex items-center ${passwordReqs.uppercase ? 'text-green-600' : 'text-gray-400'}`}>
+                  <span className="mr-2">{passwordReqs.uppercase ? '✓' : '○'}</span>
+                  Uppercase letter
+                </div>
+                <div className={`flex items-center ${passwordReqs.lowercase ? 'text-green-600' : 'text-gray-400'}`}>
+                  <span className="mr-2">{passwordReqs.lowercase ? '✓' : '○'}</span>
+                  Lowercase letter
+                </div>
+                <div className={`flex items-center ${passwordReqs.number ? 'text-green-600' : 'text-gray-400'}`}>
+                  <span className="mr-2">{passwordReqs.number ? '✓' : '○'}</span>
+                  Number
+                </div>
+                <div className={`flex items-center ${passwordReqs.special ? 'text-green-600' : 'text-gray-400'}`}>
+                  <span className="mr-2">{passwordReqs.special ? '✓' : '○'}</span>
+                  Special character
+                </div>
+              </div>
+            </div>
           )}
 
           <div className="relative">
-            <input
-              id="confirm"
-              name="confirm"
+            <Input
+              label="Confirm Password"
               type={showConfirm ? "text" : "password"}
+              placeholder="Confirm your password"
+              value={formData.confirmPassword}
+              onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+              error={errors.confirmPassword}
               required
-              value={confirm}
-              onChange={handleConfirmChange}
-              className="peer w-full px-4 pt-6 pb-3 bg-surface text-primary border border-light rounded-md shadow-sm outline-none focus:ring-2 focus:ring-accent focus:border-accent placeholder-transparent transition-all pr-10"
-              placeholder=" "
             />
-            <label
-              htmlFor="confirm"
-              className="absolute left-4 top-2 text-sm text-muted transition-all 
-                             peer-focus:text-xs peer-focus:text-secondary peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-placeholder-shown:text-disabled"
-            >
-              Confirm Password
-            </label>
             <button
               type="button"
-              onClick={() => setShowConfirm((prev) => !prev)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted hover:text-primary transition-colors"
-              tabIndex={-1}
+              onClick={() => setShowConfirm(!showConfirm)}
+              className="absolute right-3 top-8 text-secondary hover:text-primary transition-colors"
             >
-              {showConfirm ? (
-                <EyeOff className="w-5 h-5" />
-              ) : (
-                <Eye className="w-5 h-5" />
-              )}
+              {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
-          {errors.confirm && (
-            <p className="text-error text-sm mt-2">{errors.confirm}</p>
-          )}
-          {confirmError && (
-            <p className="text-error text-sm mt-2">{confirmError}</p>
-          )}
+        </div>
 
-          <div className="flex justify-between pt-2">
-            <button
-              type="button"
-              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-muted font-medium transition-all"
-              onClick={prevStep}
-            >
-              Back
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-primary hover:bg-secondary text-white rounded-md shadow-sm transition-all duration-200 focus:ring-2 focus:ring-accent focus:ring-offset-2 font-medium"
-            >
-              Next
-            </button>
-          </div>
-        </form>
+        <div className="mt-8">
+          <Button
+            onClick={handleContinue}
+            className="w-full"
+            size="lg"
+          >
+            Continue to Security Setup
+          </Button>
+        </div>
+
+        <div className="mt-6 text-center text-sm text-muted">
+          <p>Strong passwords help protect your automation workspace</p>
+        </div>
       </div>
     </div>
   );
